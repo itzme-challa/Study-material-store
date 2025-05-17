@@ -26,9 +26,17 @@ body {
   z-index: 1000;
   background: rgba(255, 255, 255, 0.1); /* Transparent with slight white tint */
   backdrop-filter: blur(8px); /* Glassmorphism effect */
+  -webkit-backdrop-filter: blur(8px); /* Safari support */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Subtle shadow */
   padding: 1rem 0;
   transition: background-color 0.3s ease;
+}
+
+/* Fallback for browsers without backdrop-filter support */
+@supports not (backdrop-filter: blur(8px)) {
+  .navbar {
+    background: rgba(255, 255, 255, 0.8); /* Slightly more opaque fallback */
+  }
 }
 
 /* White background variant (uncomment to use) */
@@ -151,36 +159,10 @@ body {
   color: #4f46e5;
 }
 
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-  .navbar .nav-links {
-    display: none; /* Hide desktop links on mobile */
-  }
-
-  .navbar .hamburger {
-    display: block; /* Show hamburger menu */
-  }
-
-  .navbar .brand {
-    font-size: 1.25rem;
-  }
+/* Main Content Padding to Avoid Navbar Overlap */
+main {
+  padding-top: 4.5rem; /* Adjust based on navbar height (approx 4rem) */
 }
-
-@media (max-width: 640px) {
-  .navbar {
-    padding: 0.75rem 0;
-  }
-
-  .navbar .container {
-    padding: 0 0.75rem;
-  }
-
-  .navbar .mobile-menu a {
-    padding: 0.5rem 0.75rem;
-  }
-}
-
-
 
 /* Product Card Styles */
 .product-card {
@@ -438,16 +420,24 @@ body {
   .product-card button {
     padding: 0.5rem 1rem;
   }
+
+  main {
+    padding-top: 4rem; /* Slightly less padding for tablets */
+  }
 }
 
 @media (max-width: 640px) {
   .navbar .brand {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
   }
 
-  .navbar button svg {
+  .navbar .hamburger svg {
     width: 1.5rem;
     height: 1.5rem;
+  }
+
+  .navbar .mobile-menu a {
+    padding: 0.5rem 0.75rem;
   }
 
   .footer .payment-methods img {
@@ -465,5 +455,9 @@ body {
 
   .product-grid {
     padding: 2rem 0;
+  }
+
+  main {
+    padding-top: 3.5rem; /* Adjusted for mobile */
   }
 }
