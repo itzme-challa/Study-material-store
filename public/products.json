@@ -1,0 +1,23 @@
+[
+  {
+    "id": "1",
+    "name": "Master the NCERT Bio 12th",
+    "price": 299,
+    "description": "Complete NCERT Biology for Class 12th",
+    "telegramLink": "https://t.me/Material_eduhubkmrbot?start=master-the-ncert-bio-12th"
+  },
+  {
+    "id": "2",
+    "name": "Master the NCERT Bio 11th",
+    "price": 299,
+    "description": "Complete NCERT Biology for Class 11th",
+    "telegramLink": "https://t.me/Material_eduhubkmrbot?start=master-the-ncert-bio-11th"
+  },
+  {
+    "id": "3",
+    "name": "Disha 144 JEE Mains Physics",
+    "price": 399,
+    "description": "Disha's 144 JEE Mains Physics Questions",
+    "telegramLink": "https://t.me/Material_eduhubkmrbot?start=disha-144-jee-mains-physics"
+  }
+]
