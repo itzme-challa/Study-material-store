@@ -7,7 +7,7 @@ export default function MyApp({ Component, pageProps }) {
   return (
     <>
       <Head>
-        <script src="https://sdk.cashfree.com/js/v3/cashfree.test.js" async></script>
+        <script src="https://sdk.cashfree.com/js/v3/cashfree.test.js"></script>
       </Head>
       <ToastContainer position="top-center" autoClose={3000} />
       <Component {...pageProps} />
