@@ -2,25 +2,25 @@ import Link from 'next/link';
 
 export default function Navbar() {
   return (
-    <nav className="bg-indigo-600 text-white shadow-lg">
+    <nav className="navbar bg-indigo-600 text-white shadow-lg">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-4">
-          <Link href="/">
-            <a className="text-xl font-bold">EduHub Study Materials</a>
+          <Link href="/" className="brand text-xl font-bold">
+            EduHub Study Materials
           </Link>
           
           <div className="hidden md:flex space-x-6">
-            <Link href="/">
-              <a className="hover:text-indigo-200 transition-colors">Home</a>
+            <Link href="/" className="hover:text-indigo-200 transition-colors">
+              Home
             </Link>
-            <Link href="/policies/contact">
-              <a className="hover:text-indigo-200 transition-colors">Contact</a>
+            <Link href="/policies/contact" className="hover:text-indigo-200 transition-colors">
+              Contact
             </Link>
-            <Link href="/policies/terms">
-              <a className="hover:text-indigo-200 transition-colors">Terms</a>
+            <Link href="/policies/terms" className="hover:text-indigo-200 transition-colors">
+              Terms
             </Link>
-            <Link href="/policies/refund">
-              <a className="hover:text-indigo-200 transition-colors">Refund Policy</a>
+            <Link href="/policies/refund" className="hover:text-indigo-200 transition-colors">
+              Refund Policy
             </Link>
           </div>
 
