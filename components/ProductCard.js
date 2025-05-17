@@ -1,41 +1,45 @@
-import { useRouter } from 'next/router';
+import { useState } from 'react';
 import { toast } from 'react-toastify';
 
 export default function ProductCard({ product }) {
-  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleBuyNow = async () => {
-  try {
-    const response = await fetch('/api/createOrder', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        productId: product.id,
-        productName: product.name,
-        amount: product.price,
-        telegramLink: product.telegramLink
-      }),
-    });
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/createOrder', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          productId: product.id,
+          productName: product.name,
+          amount: product.price,
+          telegramLink: product.telegramLink
+        }),
+      });
 
-    const data = await response.json();
-    console.log('API response:', data); // Add this line
-    
-    if (!response.ok) {
-      throw new Error(data.error || 'Payment failed');
+      const data = await response.json();
+      console.log('Order creation response:', data);
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to create payment order');
+      }
+
+      if (data.paymentLink) {
+        console.log('Redirecting to payment page:', data.paymentLink);
+        window.location.href = data.paymentLink;
+      } else {
+        throw new Error('Payment link not received');
+      }
+    } catch (error) {
+      console.error('Payment initiation error:', error);
+      toast.error(error.message);
+    } finally {
+      setIsLoading(false);
     }
-    
-    if (data.paymentLink) {
-      window.location.href = data.paymentLink;
-    } else {
-      throw new Error('No payment link received');
-    }
-  } catch (error) {
-    console.error('Checkout error:', error);
-    toast.error(error.message);
-  }
-};
+  };
 
   return (
     <div className="border rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
@@ -46,9 +50,12 @@ export default function ProductCard({ product }) {
           <span className="text-2xl font-bold">₹{product.price}</span>
           <button
             onClick={handleBuyNow}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors"
+            disabled={isLoading}
+            className={`bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors ${
+              isLoading ? 'opacity-75 cursor-not-allowed' : ''
+            }`}
           >
-            Buy Now
+            {isLoading ? 'Processing...' : 'Buy Now'}
           </button>
         </div>
       </div>
