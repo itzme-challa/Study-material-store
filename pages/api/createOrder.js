@@ -18,7 +18,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    const response = await axios.post(
+    // First create the order
+    const orderResponse = await axios.post(
       'https://api.cashfree.com/pg/orders',
       {
         order_id: `order_${productId}_${Date.now()}`,
@@ -32,7 +33,8 @@ export default async function handler(req, res) {
           customer_phone: '9999999999'
         },
         order_meta: {
-          return_url: `${process.env.NEXT_PUBLIC_SITE_URL}/success?order_id={order_id}&telegram_link=${encodeURIComponent(telegramLink)}`
+          return_url: `${process.env.NEXT_PUBLIC_SITE_URL}/success?order_id={order_id}&telegram_link=${encodeURIComponent(telegramLink)}`,
+          notify_url: `${process.env.NEXT_PUBLIC_SITE_URL}/api/paymentWebhook`
         }
       },
       {
@@ -46,15 +48,48 @@ export default async function handler(req, res) {
       }
     );
 
-    console.log('Cashfree API response:', response.data);
+    console.log('Cashfree Order API response:', orderResponse.data);
     
-    // Use the direct payment link from Cashfree response
-    const paymentLink = `https://payments.cashfree.com/order/#${response.data.cf_order_id}`;
+    // Then create the payment session
+    const paymentSessionResponse = await axios.post(
+      'https://api.cashfree.com/pg/orders/' + orderResponse.data.order_id + '/payments',
+      {
+        payment_session_id: orderResponse.data.payment_session_id,
+        payment_method: {
+          netbanking: {
+            channel: "link",
+            netbanking_bank_code: 3333 // SBI as default, can be made dynamic
+          },
+          app: {
+            provider: "googlepay",
+            phone: "9999999999"
+          }
+        },
+        order_tags: {
+          product_id: productId
+        }
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'x-client-id': process.env.CF_APP_ID,
+          'x-client-secret': process.env.CF_SECRET_KEY,
+          'x-api-version': '2022-09-01'
+        },
+        timeout: 15000
+      }
+    );
+
+    console.log('Cashfree Payment Session response:', paymentSessionResponse.data);
+    
+    // Construct the payment URL
+    const paymentLink = `https://payments.cashfree.com/order/#${orderResponse.data.cf_order_id}`;
     
     res.status(200).json({ 
       success: true,
       paymentLink: paymentLink,
-      orderId: response.data.order_id
+      orderId: orderResponse.data.order_id,
+      cfOrderId: orderResponse.data.cf_order_id
     });
 
   } catch (error) {
