@@ -26,7 +26,7 @@ export default function Home() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <ToastContainer position="top-center" autoClose={3000} />
-
+      
       <main className="flex-grow">
         <div className="hero bg-indigo-700 text-white py-12">
           <div className="container mx-auto px-4 text-center">
@@ -54,7 +54,7 @@ export default function Home() {
           )}
         </div>
       </main>
-
+      
       <Footer />
     </div>
   );
