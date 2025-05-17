@@ -3,21 +3,56 @@
     "id": "1",
     "name": "Master the NCERT Bio 12th",
     "price": 299,
-    "description": "Complete NCERT Biology for Class 12th",
-    "telegramLink": "https://t.me/Material_eduhubkmrbot?start=master-the-ncert-bio-12th"
+    "description": "Complete NCERT Biology study material for Class 12th with solved examples and practice questions",
+    "telegramLink": "https://t.me/Material_eduhubkmrbot?start=master-the-ncert-bio-12th",
+    "features": [
+      "Chapter-wise notes",
+      "Important diagrams",
+      "Previous year questions",
+      "Solved examples"
+    ],
+    "image": "/bio-12.jpg"
   },
   {
     "id": "2",
     "name": "Master the NCERT Bio 11th",
     "price": 299,
-    "description": "Complete NCERT Biology for Class 11th",
-    "telegramLink": "https://t.me/Material_eduhubkmrbot?start=master-the-ncert-bio-11th"
+    "description": "Comprehensive NCERT Biology material for Class 11th with detailed explanations",
+    "telegramLink": "https://t.me/Material_eduhubkmrbot?start=master-the-ncert-bio-11th",
+    "features": [
+      "Detailed theory",
+      "Concept maps",
+      "Practice worksheets",
+      "Quick revision notes"
+    ],
+    "image": "/bio-11.jpg"
   },
   {
     "id": "3",
     "name": "Disha 144 JEE Mains Physics",
     "price": 399,
-    "description": "Disha's 144 JEE Mains Physics Questions",
-    "telegramLink": "https://t.me/Material_eduhubkmrbot?start=disha-144-jee-mains-physics"
+    "description": "144 most important Physics questions for JEE Mains with detailed solutions",
+    "telegramLink": "https://t.me/Material_eduhubkmrbot?start=disha-144-jee-mains-physics",
+    "features": [
+      "Concept-wise questions",
+      "Detailed solutions",
+      "Quick revision tips",
+      "Important formulas"
+    ],
+    "image": "/physics-jee.jpg"
+  },
+  {
+    "id": "4",
+    "name": "NEET Chemistry Crash Course",
+    "price": 499,
+    "description": "30-day intensive NEET Chemistry preparation material",
+    "telegramLink": "https://t.me/Material_eduhubkmrbot?start=neet-chemistry-crash",
+    "features": [
+      "Organic chemistry mechanisms",
+      "Inorganic charts",
+      "Physical chemistry formulas",
+      "Practice MCQs"
+    ],
+    "image": "/neet-chem.jpg"
   }
 ]
