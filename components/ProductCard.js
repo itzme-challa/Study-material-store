@@ -5,26 +5,6 @@ import Image from 'next/image';
 export default function ProductCard({ product }) {
   const [isLoading, setIsLoading] = useState(false);
 
-  const initializeCashfree = async (paymentSessionId, orderId, telegramLink) => {
-    if (!window.Cashfree) {
-      toast.error('Cashfree SDK not loaded. Please try again.');
-      return false;
-    }
-
-    try {
-      const cashfree = new window.Cashfree(paymentSessionId);
-      cashfree.checkout({
-        paymentSessionId,
-        returnUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/success?order_id=${orderId}&telegram_link=${encodeURIComponent(telegramLink)}`,
-        redirect: true,
-      });
-      return true;
-    } catch (error) {
-      toast.error('Failed to initialize payment: ' + error.message);
-      return false;
-    }
-  };
-
   const handleBuyNow = async () => {
     setIsLoading(true);
     try {
@@ -42,23 +22,15 @@ export default function ProductCard({ product }) {
       });
 
       const data = await response.json();
-      console.log('Create Order Response:', data);
 
       if (!response.ok || !data.success) {
         throw new Error(data.error || 'Failed to create payment order');
       }
 
-      if (data.payment_session_id && data.order_id) {
-        const success = await initializeCashfree(
-          data.payment_session_id,
-          data.order_id,
-          product.telegramLink
-        );
-        if (!success) {
-          throw new Error('Failed to open payment modal');
-        }
+      if (data.paymentLink) {
+        window.location.href = data.paymentLink;
       } else {
-        throw new Error('Payment session ID or order ID not received');
+        throw new Error('Payment link not received');
       }
     } catch (error) {
       toast.error(error.message);
@@ -68,7 +40,7 @@ export default function ProductCard({ product }) {
   };
 
   return (
-    <div className="product-card">
+    <div className="product-card bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
       <div className="image-container">
         <Image
           src={product.image || '/default-course.jpg'}
@@ -78,23 +50,27 @@ export default function ProductCard({ product }) {
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
       </div>
-      <div className="content">
-        <h2>{product.name}</h2>
-        <p>{product.description}</p>
-        <div className="features">
-          <h3>Features:</h3>
-          <ul>
+      <div className="content p-6">
+        <h2 className="text-xl font-bold text-gray-800 mb-2">{product.name}</h2>
+        <p className="text-gray-600 mb-4">{product.description}</p>
+
+        <div className="features mb-4">
+          <h3 className="font-semibold text-gray-700 mb-2">Features:</h3>
+          <ul className="list-disc list-inside space-y-1 text-sm text-grayBarbara-600">
             {product.features.map((feature, index) => (
               <li key={index}>{feature}</li>
             ))}
           </ul>
         </div>
-        <div className="flex justify-between items-center">
-          <span className="price">₹{product.price}</span>
+
+        <div className="flex justify-between items-center mt-4">
+          <span className="price text-2xl font-bold text-indigo-600">₹{product.price}</span>
           <button
             onClick={handleBuyNow}
             disabled={isLoading}
-            className={`contact-button ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`}
+            className={`bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg transition-colors ${
+              isLoading ? 'opacity-75 cursor-not-allowed' : ''
+            }`}
           >
             {isLoading ? (
               <span className="flex items-center">
