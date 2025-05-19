@@ -187,23 +187,23 @@ export default function ProductCard({ product }) {
                 />
               </div>
               <div className="flex justify-end space-x-2">
-  <button
-    type="button"
-    onClick={() => setIsModalOpen(false)}
-    className="px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-xl shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition"
-  >
-    Cancel
-  </button>
-  <button
-    type="submit"
-    disabled={isBuying}
-    className={`px-5 py-2 bg-indigo-600 text-white font-medium rounded-xl shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ${
-      isBuying ? 'opacity-60 cursor-not-allowed' : ''
-    }`}
-  >
-    {isBuying ? 'Processing...' : 'Proceed to Payment'}
-  </button>
-</div>
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className={`px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors ${
+                    isLoading ? 'opacity-75 cursor-not-allowed' : ''
+                  }`}
+                >
+                  {isLoading ? 'Processing...' : 'Proceed to Payment'}
+                </button>
+              </div>
             </form>
           </div>
         </div>
