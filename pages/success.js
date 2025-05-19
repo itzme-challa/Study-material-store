@@ -1,79 +1,64 @@
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { useEffect, useState } from 'react';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
-export default function SuccessPage() {
+export default function Success() {
   const router = useRouter();
-  const { order_id, telegram_link } = router.query;
-  const [isVerifying, setIsVerifying] = useState(true);
+  const { product_id } = router.query;
+  const [telegramLink, setTelegramLink] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (order_id && telegram_link) {
-      const verifyPayment = async () => {
-        try {
-          const response = await fetch('/api/verifyPayment', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ orderId: order_id }),
-          });
-
-          const data = await response.json();
-          console.log('Payment verification data:', data);
-
-          if (!response.ok) {
-            throw new Error(data.error || 'Verification failed');
-          }
-
-          if (data.order_status === 'PAID') {
-            toast.success('Payment verified! Redirecting...');
+    if (product_id) {
+      fetch('/products.json')
+        .then((res) => res.json())
+        .then((data) => {
+          const product = data.find((p) => p.id === parseInt(product_id));
+          if (product && product.telegramLink) {
+            setTelegramLink(product.telegramLink);
             setTimeout(() => {
-              window.location.href = decodeURIComponent(telegram_link);
-            }, 2000);
-          } else {
-            toast.warning(`Payment status: ${data.order_status}`);
+              window.location.href = product.telegramLink;
+            }, 5000); // Redirect after 5 seconds
           }
-        } catch (error) {
-          console.error('Verification error:', error);
-          toast.error(`Verification failed: ${error.message}`);
-        } finally {
-          setIsVerifying(false);
-        }
-      };
-
-      verifyPayment();
+          setIsLoading(false);
+        })
+        .catch((error) => {
+          console.error('Error loading product:', error);
+          setIsLoading(false);
+        });
     }
-  }, [order_id, telegram_link]);
+  }, [product_id]);
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
-      <ToastContainer position="top-center" autoClose={5000} />
-      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full text-center">
-        <h1 className="text-2xl font-bold text-green-600 mb-4">
-          {isVerifying ? 'Verifying Payment...' : 'Payment Processed'}
-        </h1>
-        
-        {isVerifying ? (
-          <>
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-6"></div>
-            <p>Please wait while we verify your payment...</p>
-          </>
-        ) : (
-          <>
-            <p className="mb-6">Thank you for your purchase!</p>
-            {telegram_link && (
-              <a
-                href={decodeURIComponent(telegram_link)}
-                className="mt-4 inline-block bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors"
-              >
-                Access Your Study Material
-              </a>
+    <div className="flex flex-col min-h-screen">
+      <Navbar />
+      <main className="flex-grow">
+        <div className="container mx-auto px-4 py-12">
+          <div className="success-card">
+            {isLoading ? (
+              <div className="flex justify-center items-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+              </div>
+            ) : telegramLink ? (
+              <>
+                <h1 className="text-3xl font-bold text-center mb-4">Payment Successful!</h1>
+                <p className="text-center text-gray-600 mb-6">
+                  Thank you for your purchase. You will be redirected to the Telegram group in 5 seconds.
+                </p>
+                <p className="text-center">
+                  <a href={telegramLink} className="text-indigo-600 hover:text-indigo-800 transition-colors">
+                    Click here to join now
+                  </a>
+                </p>
+              </>
+            ) : (
+              <p className="text-center text-gray-600">Error: Telegram link not found.</p>
             )}
-          </>
-        )}
-      </div>
+          </div>
+        </div>
+      </main>
+      <Footer />
     </div>
   );
 }
