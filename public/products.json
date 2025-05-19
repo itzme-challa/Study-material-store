@@ -1,53 +1,36 @@
 [
   {
     "id": 1,
-    "name": "Mastering JavaScript",
-    "description": "A comprehensive guide to modern JavaScript programming, covering ES6+ and advanced concepts.",
-    "price": 599,
-    "image": "/images/javascript-book.jpg",
-    "telegramLink": "https://t.me/javascript_group",
+    "name": "Akash Modules – Class 11",
+    "description": "Comprehensive Akash Institute modules for Class 11, perfect for NEET, Boards, and JEE Mains preparation. Includes detailed theory, exercises, and fully-solved solutions.",
+    "price": 10,
+    "image": "images/akash-modules.jpg",
+    "telegramLink": "https://t.me/Material_eduhubkmrbot?start=akash-modules",
     "features": [
-      "In-depth ES6+ coverage",
-      "Practical coding examples",
-      "Interactive exercises",
-      "Access to online resources"
+      "All chapters of Class 11",
+      "Detailed theory explanations",
+      "Extensive exercises with solutions",
+      "Latest version for NEET, Boards & JEE"
     ],
-    "rating": 4.8,
-    "category": "Programming",
-    "author": "John Doe"
+    "rating": 4.7,
+    "category": "NEET, BOARDS, JEE MAINS",
+    "author": "Akash Institute"
   },
   {
     "id": 2,
-    "name": "Python for Data Science",
-    "description": "Learn Python programming with a focus on data analysis, machine learning, and visualization.",
-    "price": 799,
-    "image": "/images/python-book.jpg",
-    "telegramLink": "https://t.me/python_group",
+    "name": "Allen Modules – Class 11",
+    "description": "Latest Allen Institute modules for Class 11 students, ideal for NEET, Boards, and JEE Mains. Covers theory, exercises, and solutions in a structured format.",
+    "price": 2,
+    "image": "images/allen-modules.jpg",
+    "telegramLink": "https://t.me/Material_eduhubkmrbot?start=allen-modules",
     "features": [
-      "Data analysis techniques",
-      "Machine learning basics",
-      "Jupyter notebook tutorials",
-      "Real-world projects"
+      "Complete Class 11 syllabus",
+      "High-quality theory content",
+      "Practice problems with solutions",
+      "Optimized for NEET, Boards & JEE"
     ],
-    "rating": 4.5,
-    "category": "Data Science",
-    "author": "Jane Smith"
-  },
-  {
-    "id": 3,
-    "name": "React in Action",
-    "description": "Build modern web applications with React, including state management and hooks.",
-    "price": 649,
-    "image": "/images/react-book.jpg",
-    "telegramLink": "https://t.me/react_group",
-    "features": [
-      "React hooks in-depth",
-      "State management with Redux",
-      "Real-world app examples",
-      "Performance optimization"
-    ],
-    "rating": 4.9,
-    "category": "Web Development",
-    "author": "Alice Johnson"
+    "rating": 4.8,
+    "category": "NEET, BOARDS, JEE MAINS",
+    "author": "Allen Institute"
   }
 ]
