@@ -36,7 +36,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div>
+<div>
   <h3 className="text-base font-medium mb-1">Payment Methods</h3>
   <div className="flex flex-wrap items-center gap-2">
     <img src="/images/gpay.svg" alt="Google Pay" className="h-5" />
