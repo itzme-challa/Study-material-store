@@ -1,13 +1,13 @@
 [
   {
     "id": 1,
-    "name": "Akash Modules – Class 11",
-    "description": "Comprehensive Akash Institute modules for Class 11, perfect for NEET, Boards, and JEE Mains preparation. Includes detailed theory, exercises, and fully-solved solutions.",
+    "name": "Akash Modules – Class 11th,12th,Dropper",
+    "description": "Comprehensive Akash Institute modules for Class 11th,12th,Dropper perfect for NEET, Boards, and JEE Mains preparation. Includes detailed theory, exercises, and fully-solved solutions.",
     "price": 10,
     "image": "images/akash-modules.jpg",
     "telegramLink": "https://t.me/Material_eduhubkmrbot?start=akash-modules",
     "features": [
-      "All chapters of Class 11",
+      "All chapters of Class 11th,12th,",
       "Detailed theory explanations",
       "Extensive exercises with solutions",
       "Latest version for NEET, Boards & JEE"
@@ -18,13 +18,13 @@
   },
   {
     "id": 2,
-    "name": "Allen Modules – Class 11",
-    "description": "Latest Allen Institute modules for Class 11 students, ideal for NEET, Boards, and JEE Mains. Covers theory, exercises, and solutions in a structured format.",
+    "name": "Allen Modules – Class 11th,12th,Dropper",
+    "description": "Latest Allen Institute modules for Class 11th,12th,Dropper students, ideal for NEET, Boards, and JEE Mains. Covers theory, exercises, and solutions in a structured format.",
     "price": 2,
     "image": "images/allen-modules.jpg",
     "telegramLink": "https://t.me/Material_eduhubkmrbot?start=allen-modules",
     "features": [
-      "Complete Class 11 syllabus",
+      "Complete Class 11th,12th syllabus",
       "High-quality theory content",
       "Practice problems with solutions",
       "Optimized for NEET, Boards & JEE"
