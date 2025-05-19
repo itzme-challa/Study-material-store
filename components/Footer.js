@@ -37,12 +37,17 @@ export default function Footer() {
           </div>
 
           <div>
-  <h3>Payment Methods</h3>
-  <div className="payment-methods flex space-x-4">
-    <img src="/images/cards-logo.png" alt="Credit/Debit Cards" className="h-8" />
+  <h3 className="text-lg font-semibold mb-2">Payment Methods</h3>
+  <div className="flex flex-wrap items-center gap-4">
+    <img src="/images/gpay.svg" alt="Google Pay" className="h-8" />
+    <img src="/images/phonepe.svg" alt="PhonePe" className="h-8" />
+    <img src="/images/upi.svg" alt="UPI" className="h-8" />
+    <img src="/images/netbanking.svg" alt="Netbanking" className="h-8" />
+    <img src="/images/mastercard.svg" alt="MasterCard" className="h-8" />
+    <img src="/images/visa.svg" alt="Visa" className="h-8" />
+    <img src="/images/rupay.svg" alt="RuPay" className="h-8" />
   </div>
 </div>
-
           <div>
             <h3>Connect With Us</h3>
             <div className="social-icons flex space-x-4">
