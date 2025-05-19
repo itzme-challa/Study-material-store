@@ -5,23 +5,23 @@ export default async function handler(req, res) {
 
   console.log('Webhook received:', JSON.stringify(req.body, null, 2));
 
-  // Verify the webhook signature
   const signature = req.headers['x-cf-signature'];
-  const secret = process.env.CF_WEBHOOK_SECRET; // Set this in your env
-  
-  // In production, you should verify the signature here
-  // For now we'll just log the data
+  const secret = process.env.CF_WEBHOOK_SECRET;
 
-  const { orderId, orderAmount, referenceId, txStatus, paymentMode } = req.body;
+  // TODO: Implement signature verification here for production!
+
+  const { orderId, orderAmount, referenceId, txStatus, paymentMode, cf_order_id } = req.body;
 
   try {
-    // Here you would typically:
-    // 1. Verify the payment
-    // 2. Update your database
-    // 3. Send the product to the user
-    
-    console.log(`Payment ${txStatus} for order ${orderId}`);
-    
+    // Example processing: verify payment status and update your DB or send product
+
+    if (txStatus === 'SUCCESS') {
+      console.log(`Payment SUCCESS for order ${orderId}, CF order id: ${cf_order_id}`);
+      // TODO: Add your product delivery logic here
+    } else {
+      console.log(`Payment status: ${txStatus} for order ${orderId}`);
+    }
+
     res.status(200).json({ received: true });
   } catch (error) {
     console.error('Webhook processing error:', error);
