@@ -37,15 +37,15 @@ export default function Footer() {
           </div>
 
           <div>
-  <h3 className="text-lg font-semibold mb-2">Payment Methods</h3>
-  <div className="flex flex-wrap items-center gap-4">
-    <img src="/images/gpay.svg" alt="Google Pay" className="h-8" />
-    <img src="/images/phonepe.svg" alt="PhonePe" className="h-8" />
-    <img src="/images/upi.svg" alt="UPI" className="h-8" />
-    <img src="/images/netbanking.svg" alt="Netbanking" className="h-8" />
-    <img src="/images/mastercard.svg" alt="MasterCard" className="h-8" />
-    <img src="/images/visa.svg" alt="Visa" className="h-8" />
-    <img src="/images/rupay.svg" alt="RuPay" className="h-8" />
+  <h3 className="text-base font-medium mb-1">Payment Methods</h3>
+  <div className="flex flex-wrap items-center gap-2">
+    <img src="/images/gpay.svg" alt="Google Pay" className="h-5" />
+    <img src="/images/phonepe.svg" alt="PhonePe" className="h-5" />
+    <img src="/images/upi.svg" alt="UPI" className="h-5" />
+    <img src="/images/netbanking.svg" alt="Netbanking" className="h-5" />
+    <img src="/images/mastercard.svg" alt="MasterCard" className="h-5" />
+    <img src="/images/visa.svg" alt="Visa" className="h-5" />
+    <img src="/images/rupay.svg" alt="RuPay" className="h-5" />
   </div>
 </div>
           <div>
