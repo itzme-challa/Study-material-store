@@ -56,7 +56,7 @@ export default async function handler(req, res) {
     console.log('Cashfree Order API response:', orderResponse.data);
 
     // Construct the payment URL (use cf_order_id from response)
-    const paymentLink = `https://payments.cashfree.com/order/#${orderResponse.data.cf_order_id}`;
+    const paymentLink = `https://payments.cashfree.com/order/${orderResponse.data.cf_order_id}`;
 
     res.status(200).json({
       success: true,
