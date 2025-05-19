@@ -12,6 +12,12 @@ export default function ProductDetail() {
   const [product, setProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isBuying, setIsBuying] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    customerName: '',
+    customerEmail: '',
+    customerPhone: '',
+  });
 
   useEffect(() => {
     if (id) {
@@ -37,7 +43,31 @@ export default function ProductDetail() {
     document.body.appendChild(script);
   }, []);
 
-  const handleBuyNow = async () => {
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const validateForm = () => {
+    if (!formData.customerName || !formData.customerEmail || !formData.customerPhone) {
+      toast.error('Please fill in all fields.');
+      return false;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.customerEmail)) {
+      toast.error('Please enter a valid email.');
+      return false;
+    }
+    if (!/^\d{10}$/.test(formData.customerPhone)) {
+      toast.error('Please enter a valid 10-digit phone number.');
+      return false;
+    }
+    return true;
+  };
+
+  const handleBuyNow = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
     setIsBuying(true);
     try {
       const response = await fetch('/api/createOrder', {
@@ -48,6 +78,9 @@ export default function ProductDetail() {
           productName: product.name,
           amount: product.price,
           telegramLink: product.telegramLink,
+          customerName: formData.customerName,
+          customerEmail: formData.customerEmail,
+          customerPhone: formData.customerPhone,
         }),
       });
 
@@ -55,7 +88,7 @@ export default function ProductDetail() {
       if (!response.ok || !data.success) {
         throw new Error(data.error || 'Failed to create payment order');
       }
-      const paymentSessionId = data.paymentSessionId || data.payment_session_id;
+      const paymentSessionId = data.paymentSessionId;
       if (!window?.Cashfree || !paymentSessionId) {
         throw new Error('Cashfree SDK not loaded or session missing');
       }
@@ -64,6 +97,8 @@ export default function ProductDetail() {
         paymentSessionId,
         redirectTarget: '_self',
       });
+      setFormData({ customerName: '', customerEmail: '', customerPhone: '' });
+      setIsModalOpen(false);
     } catch (error) {
       toast.error(error.message);
     } finally {
@@ -121,7 +156,7 @@ export default function ProductDetail() {
               <div className="flex items-center space-x-6">
                 <span className="price">₹{product.price}</span>
                 <button
-                  onClick={handleBuyNow}
+                  onClick={() => setIsModalOpen(true)}
                   disabled={isBuying}
                   className={`buy-button ${isBuying ? 'opacity-75 cursor-not-allowed' : ''}`}
                 >
@@ -152,6 +187,77 @@ export default function ProductDetail() {
         </div>
       </main>
       <Footer />
+
+      {/* Modal for User Details */}
+      {isModalOpen && (
+        <div className="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="modal-content bg-white rounded-lg p-6 max-w-md w-full">
+            <h2 className="text-xl font-semibold mb-4">Enter Your Details</h2>
+            <form onSubmit={handleBuyNow} className="space-y-4">
+              <div>
+                <label htmlFor="customerName" className="block text-sm font-medium text-gray-700">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  id="customerName"
+                  name="customerName"
+                  value={formData.customerName}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="customerEmail" className="block text-sm font-medium text-gray-700">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="customerEmail"
+                  name="customerEmail"
+                  value={formData.customerEmail}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="customerPhone" className="block text-sm font-medium text-gray-700">
+                  Phone (10 digits)
+                </label>
+                <input
+                  type="tel"
+                  id="customerPhone"
+                  name="customerPhone"
+                  value={formData.customerPhone}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full"
+                  required
+                />
+              </div>
+              <div className="flex justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isBuying}
+                  className={`px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors ${
+                    isBuying ? 'opacity-75 cursor-not-allowed' : ''
+                  }`}
+                >
+                  {isBuying ? 'Processing...' : 'Proceed to Payment'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
