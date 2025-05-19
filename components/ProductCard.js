@@ -139,75 +139,70 @@ export default function ProductCard({ product }) {
       </div>
 
       {/* Modal for User Details */}
-      {isModalOpen && (
-        <div className="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="modal-content bg-white rounded-lg p-6 max-w-md w-full">
-            <h2 className="text-xl font-semibold mb-4">Enter Your Details</h2>
-            <form onSubmit={handleBuyNow} className="space-y-4">
-              <div>
-                <label htmlFor="customerName" className="block text-sm font-medium text-gray-700">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  id="customerName"
-                  name="customerName"
-                  value={formData.customerName}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full"
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="customerEmail" className="block text-sm font-medium text-gray-700">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="customerEmail"
-                  name="customerEmail"
-                  value={formData.customerEmail}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full"
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="customerPhone" className="block text-sm font-medium text-gray-700">
-                  Phone (10 digits)
-                </label>
-                <input
-                  type="tel"
-                  id="customerPhone"
-                  name="customerPhone"
-                  value={formData.customerPhone}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full"
-                  required
-                />
-              </div>
-              <div className="flex justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className={`px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors ${
-                    isLoading ? 'opacity-75 cursor-not-allowed' : ''
-                  }`}
-                >
-                  {isLoading ? 'Processing...' : 'Proceed to Payment'}
-                </button>
-              </div>
-            </form>
-          </div>
+{isModalOpen && (
+  <div className="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="modal-content bg-white rounded-lg p-6 max-w-md w-full">
+      <h2 className="text-xl font-semibold mb-4">Enter Your Details</h2>
+      <form onSubmit={handleBuyNow} className="space-y-4">
+        <div>
+          <label htmlFor="customerName" className="block text-sm font-medium text-gray-700">
+            Name
+          </label>
+          <input
+            type="text"
+            id="customerName"
+            name="customerName"
+            value={formData.customerName}
+            onChange={handleInputChange}
+            className="mt-1 block w-full"
+            required
+          />
         </div>
-      )}
+        <div>
+          <label htmlFor="customerEmail" className="block text-sm font-medium text-gray-700">
+            Email
+          </label>
+          <input
+            type="email"
+            id="customerEmail"
+            name="customerEmail"
+            value={formData.customerEmail}
+            onChange={handleInputChange}
+            className="mt-1 block w-full"
+            required
+          />
+        </div>
+        <div>
+          <label htmlFor="customerPhone" className="block text-sm font-medium text-gray-700">
+            Phone (10 digits)
+          </label>
+          <input
+            type="tel"
+            id="customerPhone"
+            name="customerPhone"
+            value={formData.customerPhone}
+            onChange={handleInputChange}
+            className="mt-1 block w-full"
+            required
+          />
+        </div>
+        <div className="flex justify-end space-x-2">
+          <button
+            type="button"
+            onClick={() => setIsModalOpen(false)}
+            className="modal-cancel-button"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className={`modal-proceed-button ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`}
+          >
+            {isLoading ? 'Processing...' : 'Proceed to Payment'}
+          </button>
+        </div>
+      </form>
     </div>
-  );
-}
+  </div>
+)}
