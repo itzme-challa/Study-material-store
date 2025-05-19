@@ -236,7 +236,7 @@ export default function ProductDetail() {
                   required
                 />
               </div>
-              <div className="flex justify-end space-x-2">
+             <div className="flex justify-end space-x-2">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
@@ -246,12 +246,12 @@ export default function ProductDetail() {
                 </button>
                 <button
                   type="submit"
-                  disabled={isBuying}
+                  disabled={isLoading}
                   className={`px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors ${
-                    isBuying ? 'opacity-75 cursor-not-allowed' : ''
+                    isLoading ? 'opacity-75 cursor-not-allowed' : ''
                   }`}
                 >
-                  {isBuying ? 'Processing...' : 'Proceed to Payment'}
+                  {isLoading ? 'Processing...' : 'Proceed to Payment'}
                 </button>
               </div>
             </form>
