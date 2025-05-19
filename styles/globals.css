@@ -229,51 +229,168 @@ h1, h2, h3 {
 
 /* Footer Styles */
 .footer {
-  background: linear-gradient(180deg, #1f2937, #111827);
-  padding: 3rem 0;
+  background-color: #1f2937; /* bg-gray-800 */
+  color: #ffffff;
+  padding: 2rem 1rem;
+  font-family: 'Inter', sans-serif; /* Modern font */
+}
+
+.footer .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.footer .grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 2rem;
 }
 
 .footer h3 {
-  font-family: 'Playfair Display', serif;
   font-size: 1.25rem;
-  font-weight: 700;
-  color: #ffffff;
+  font-weight: 600;
   margin-bottom: 1rem;
+  color: #ffffff;
+  letter-spacing: 0.025em;
+}
+
+.footer p,
+.footer .text-gray-400 {
+  color: #9ca3af; /* text-gray-400 */
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.footer ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer ul li {
+  margin-bottom: 0.5rem;
 }
 
 .footer a {
-  font-size: 0.875rem;
-  color: #d1d5db;
+  text-decoration: none;
+  color: #9ca3af;
   transition: color 0.3s ease;
 }
 
 .footer a:hover {
-  color: #4f46e5;
+  color: #ffffff;
 }
 
+/* Payment Methods */
+.footer .flex-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.footer .flex-wrap img {
+  height: 1.25rem; /* Smaller size for payment icons */
+  width: auto;
+  object-fit: contain;
+  filter: grayscale(50%); /* Subtle effect for consistency */
+  transition: filter 0.3s ease;
+}
+
+.footer .flex-wrap img:hover {
+  filter: grayscale(0);
+}
+
+/* Social Icons */
 .footer .social-icons {
   display: flex;
   gap: 1rem;
 }
 
+.footer .social-icons a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: #374151; /* Slightly lighter for contrast */
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.footer .social-icons a:hover {
+  background-color: #4b5563;
+  color: #ffffff;
+}
+
 .footer .social-icons svg {
-  width: 1.5rem;
-  height: 1.5rem;
-  transition: transform 0.3s ease;
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
-.footer .social-icons a:hover svg {
-  transform: scale(1.15);
-  color: #4f46e5;
-}
-
+/* Copyright Section */
 .footer .copyright {
-  font-size: 0.75rem;
-  color: #d1d5db;
+  border-top: 1px solid #374151; /* border-gray-700 */
   margin-top: 2rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 1.5rem;
   text-align: center;
+}
+
+.footer .copyright p {
+  font-size: 0.875rem;
+  color: #9ca3af;
+}
+
+/* Responsive Design */
+@media (min-width: 768px) {
+  .footer .grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .footer {
+    padding: 1.5rem 0.75rem;
+  }
+
+  .footer h3 {
+    font-size: 1.125rem;
+  }
+
+  .footer .flex-wrap img {
+    height: 1rem; /* Even smaller on small screens */
+  }
+
+  .footer .social-icons a {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .footer .social-icons svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .footer .copyright p {
+    font-size: 0.75rem;
+  }
+}
+
+/* Animation for smooth transitions */
+.footer a,
+.footer img {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Accessibility Improvements */
+.footer a:focus {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+.footer .social-icons a:focus {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+  border-radius: 50%;
 }
 
 /* Product Detail Page */
