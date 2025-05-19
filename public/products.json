@@ -1,58 +1,54 @@
 [
   {
     "id": "1",
-    "name": "Master the NCERT Bio 12th",
-    "price": 2,
-    "description": "Complete NCERT Biology study material for Class 12th with solved examples and practice questions",
-    "telegramLink": "https://t.me/Material_eduhubkmrbot?start=master-the-ncert-bio-12th",
+    "name": "Advanced Mathematics for Engineers",
+    "description": "Comprehensive guide covering all advanced mathematics topics required for engineering students.",
+    "price": 899,
+    "image": "/math-engineers.jpg",
     "features": [
-      "Chapter-wise notes",
-      "Important diagrams",
-      "Previous year questions",
-      "Solved examples"
-    ],
-    "image": "/bio-12.jpg"
+      "1000+ solved problems",
+      "Step-by-step solutions",
+      "Practice exercises with answers",
+      "Covers calculus, linear algebra, and more"
+    ]
   },
   {
     "id": "2",
-    "name": "Master the NCERT Bio 11th",
-    "price": 299,
-    "description": "Comprehensive NCERT Biology material for Class 11th with detailed explanations",
-    "telegramLink": "https://t.me/Material_eduhubkmrbot?start=master-the-ncert-bio-11th",
+    "name": "Complete Physics Handbook",
+    "description": "Essential physics concepts from mechanics to quantum physics with practical applications.",
+    "price": 749,
+    "image": "/physics-handbook.jpg",
     "features": [
-      "Detailed theory",
-      "Concept maps",
-      "Practice worksheets",
-      "Quick revision notes"
-    ],
-    "image": "/bio-11.jpg"
+      "All major physics topics",
+      "Illustrated diagrams",
+      "Real-world applications",
+      "Exam preparation tips"
+    ]
   },
   {
     "id": "3",
-    "name": "Disha 144 JEE Mains Physics",
-    "price": 399,
-    "description": "144 most important Physics questions for JEE Mains with detailed solutions",
-    "telegramLink": "https://t.me/Material_eduhubkmrbot?start=disha-144-jee-mains-physics",
+    "name": "Computer Science Fundamentals",
+    "description": "Master the core concepts of computer science with this comprehensive textbook.",
+    "price": 999,
+    "image": "/cs-fundamentals.jpg",
     "features": [
-      "Concept-wise questions",
-      "Detailed solutions",
-      "Quick revision tips",
-      "Important formulas"
-    ],
-    "image": "/physics-jee.jpg"
+      "Algorithms & Data Structures",
+      "Programming paradigms",
+      "Database systems",
+      "Computer architecture"
+    ]
   },
   {
     "id": "4",
-    "name": "NEET Chemistry Crash Course",
-    "price": 499,
-    "description": "30-day intensive NEET Chemistry preparation material",
-    "telegramLink": "https://t.me/Material_eduhubkmrbot?start=neet-chemistry-crash",
+    "name": "Business Economics Guide",
+    "description": "Understand modern business economics with case studies and analysis techniques.",
+    "price": 649,
+    "image": "/business-economics.jpg",
     "features": [
-      "Organic chemistry mechanisms",
-      "Inorganic charts",
-      "Physical chemistry formulas",
-      "Practice MCQs"
-    ],
-    "image": "/neet-chem.jpg"
+      "Micro & macroeconomics",
+      "Market analysis",
+      "Financial decision making",
+      "Case studies included"
+    ]
   }
 ]
