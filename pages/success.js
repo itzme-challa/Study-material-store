@@ -44,7 +44,7 @@ export default function Success() {
               <>
                 <h1 className="text-3xl font-bold text-center mb-4">Payment Successful!</h1>
                 <p className="text-center text-gray-600 mb-6">
-                  Thank you for your purchase. You will be redirected to the Telegram group in 5 seconds.
+                  Thank you for your purchase. You will be redirected to the Material in 5 seconds,
                 </p>
                 <p className="text-center">
                   <a href={telegramLink} className="text-indigo-600 hover:text-indigo-800 transition-colors">
