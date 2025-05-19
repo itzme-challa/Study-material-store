@@ -1,18 +1,25 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import Image from 'next/image';
 
 export default function ProductCard({ product }) {
   const [isLoading, setIsLoading] = useState(false);
 
+  // Load Cashfree script once when the component mounts
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
+    script.async = true;
+    script.onload = () => console.log('Cashfree SDK loaded');
+    document.body.appendChild(script);
+  }, []);
+
   const handleBuyNow = async () => {
     setIsLoading(true);
     try {
       const response = await fetch('/api/createOrder', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           productId: product.id,
           productName: product.name,
@@ -27,11 +34,18 @@ export default function ProductCard({ product }) {
         throw new Error(data.error || 'Failed to create payment order');
       }
 
-      if (data.paymentLink) {
-        window.location.href = data.paymentLink;
-      } else {
-        throw new Error('Payment link not received');
+      const paymentSessionId = data.paymentSessionId || data.payment_session_id;
+      if (!window?.Cashfree || !paymentSessionId) {
+        throw new Error('Cashfree SDK not loaded or session missing');
       }
+
+      const cashfree = window.Cashfree({ mode: 'production' });
+      const checkoutOptions = {
+        paymentSessionId,
+        redirectTarget: '_self', // could use '_blank' for new tab
+      };
+
+      cashfree.checkout(checkoutOptions);
     } catch (error) {
       toast.error(error.message);
     } finally {
@@ -56,7 +70,7 @@ export default function ProductCard({ product }) {
 
         <div className="features mb-4">
           <h3 className="font-semibold text-gray-700 mb-2">Features:</h3>
-          <ul className="list-disc list-inside space-y-1 text-sm text-grayBarbara-600">
+          <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
             {product.features.map((feature, index) => (
               <li key={index}>{feature}</li>
             ))}
