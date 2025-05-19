@@ -37,13 +37,13 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3>Payment Methods</h3>
-            <div className="payment-methods flex space-x-4">
-              <img src="/upi-logo.png" alt="UPI" />
-              <img src="/cards-logo.png" alt="Credit/Debit Cards" />
-              <img src="/netbanking-logo.png" alt="Net Banking" />
-            </div>
-          </div>
+  <h3>Payment Methods</h3>
+  <div className="payment-methods flex space-x-4">
+    <img src="/images/upi-logo.png" alt="UPI" className="h-8" />
+    <img src="/images/cards-logo.png" alt="Credit/Debit Cards" className="h-8" />
+    <img src="/images/netbanking-logo.png" alt="Net Banking" className="h-8" />
+  </div>
+</div>
 
           <div>
             <h3>Connect With Us</h3>
