@@ -1,54 +1,53 @@
 [
   {
-    "id": "1",
-    "name": "Advanced Mathematics for Engineers",
-    "description": "Comprehensive guide covering all advanced mathematics topics required for engineering students.",
-    "price": 899,
-    "image": "/math-engineers.jpg",
+    "id": 1,
+    "name": "Mastering JavaScript",
+    "description": "A comprehensive guide to modern JavaScript programming, covering ES6+ and advanced concepts.",
+    "price": 599,
+    "image": "/images/javascript-book.jpg",
+    "telegramLink": "https://t.me/javascript_group",
     "features": [
-      "1000+ solved problems",
-      "Step-by-step solutions",
-      "Practice exercises with answers",
-      "Covers calculus, linear algebra, and more"
-    ]
+      "In-depth ES6+ coverage",
+      "Practical coding examples",
+      "Interactive exercises",
+      "Access to online resources"
+    ],
+    "rating": 4.8,
+    "category": "Programming",
+    "author": "John Doe"
   },
   {
-    "id": "2",
-    "name": "Complete Physics Handbook",
-    "description": "Essential physics concepts from mechanics to quantum physics with practical applications.",
-    "price": 749,
-    "image": "/physics-handbook.jpg",
+    "id": 2,
+    "name": "Python for Data Science",
+    "description": "Learn Python programming with a focus on data analysis, machine learning, and visualization.",
+    "price": 799,
+    "image": "/images/python-book.jpg",
+    "telegramLink": "https://t.me/python_group",
     "features": [
-      "All major physics topics",
-      "Illustrated diagrams",
-      "Real-world applications",
-      "Exam preparation tips"
-    ]
+      "Data analysis techniques",
+      "Machine learning basics",
+      "Jupyter notebook tutorials",
+      "Real-world projects"
+    ],
+    "rating": 4.5,
+    "category": "Data Science",
+    "author": "Jane Smith"
   },
   {
-    "id": "3",
-    "name": "Computer Science Fundamentals",
-    "description": "Master the core concepts of computer science with this comprehensive textbook.",
-    "price": 999,
-    "image": "/cs-fundamentals.jpg",
-    "features": [
-      "Algorithms & Data Structures",
-      "Programming paradigms",
-      "Database systems",
-      "Computer architecture"
-    ]
-  },
-  {
-    "id": "4",
-    "name": "Business Economics Guide",
-    "description": "Understand modern business economics with case studies and analysis techniques.",
+    "id": 3,
+    "name": "React in Action",
+    "description": "Build modern web applications with React, including state management and hooks.",
     "price": 649,
-    "image": "/business-economics.jpg",
+    "image": "/images/react-book.jpg",
+    "telegramLink": "https://t.me/react_group",
     "features": [
-      "Micro & macroeconomics",
-      "Market analysis",
-      "Financial decision making",
-      "Case studies included"
-    ]
+      "React hooks in-depth",
+      "State management with Redux",
+      "Real-world app examples",
+      "Performance optimization"
+    ],
+    "rating": 4.9,
+    "category": "Web Development",
+    "author": "Alice Johnson"
   }
 ]
