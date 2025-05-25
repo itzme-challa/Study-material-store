@@ -5,6 +5,10 @@ import Footer from '../components/Footer';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+// Constants for default values
+const DEFAULT_IMAGE = '/images/default-book.jpg';
+const DEFAULT_PRICE = 10;
+
 export default function Home() {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -50,6 +54,8 @@ export default function Home() {
         link: `https://t.me/Material_eduhubkmrbot?start=${item.key}`,
         description: `${item.label || 'Material'} - ${group.title || 'General'}`,
         category,
+        price: DEFAULT_PRICE, // Set default price of 10
+        image: DEFAULT_IMAGE, // Set default image
       }))
     );
   }
