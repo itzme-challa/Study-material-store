@@ -10,17 +10,35 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/products.json')
-      .then((res) => res.json())
-      .then((data) => {
-        setProducts(data);
+    Promise.all([
+      fetch('/products.json').then((res) => res.json()).catch(() => []),
+      fetch('/material.json').then((res) => res.json()).catch(() => []),
+    ])
+      .then(([productsData, materialData]) => {
+        const materialProducts = transformMaterialToProducts(materialData);
+        setProducts([...productsData, ...materialProducts]);
         setIsLoading(false);
       })
       .catch((error) => {
-        console.error('Error loading products:', error);
+        console.error('Error loading data:', error);
         setIsLoading(false);
       });
   }, []);
+
+  function transformMaterialToProducts(materialData) {
+    let idCounter = 1000; // offset to prevent ID clash
+    const category = 'NEET,JEE,BOARDS';
+
+    return materialData.flatMap((group) =>
+      group.items.map((item) => ({
+        id: idCounter++,
+        name: item.label,
+        link: `https://t.me/Material_eduhubkmrbot?start=${item.key}`,
+        description: `${item.label} - ${group.title}`,
+        category,
+      }))
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
