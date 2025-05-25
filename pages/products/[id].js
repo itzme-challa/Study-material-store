@@ -20,19 +20,58 @@ export default function ProductDetail() {
   });
 
   useEffect(() => {
-    if (id) {
-      fetch('/products.json')
-        .then((res) => res.json())
-        .then((data) => {
-          const foundProduct = data.find((p) => p.id === parseInt(id));
-          setProduct(foundProduct);
+    if (!id) return;
+
+    async function loadProduct() {
+      try {
+        const [productRes, materialRes] = await Promise.all([
+          fetch('/products.json').then(res => res.json()),
+          fetch('/material.json').then(res => res.json())
+        ]);
+
+        let found = productRes.find(p => p.id === parseInt(id));
+        if (found) {
+          setProduct(found);
           setIsLoading(false);
-        })
-        .catch((error) => {
-          console.error('Error loading product:', error);
-          setIsLoading(false);
-        });
+          return;
+        }
+
+        // If not found, try to extract from material.json
+        for (const section of materialRes) {
+          for (const item of section.items) {
+            if (item.key === id) {
+              const generatedProduct = {
+                id: id,
+                name: item.label,
+                description: `${item.label} from ${section.title}`,
+                category: 'NEET, JEE, BOARDS',
+                price: 29,
+                author: 'EduHubKMR',
+                features: [
+                  'PDF + Telegram Access',
+                  'Instant Delivery After Payment',
+                  'Works on Any Device'
+                ],
+                telegramLink: `https://t.me/Material_eduhubkmrbot?start=${id}`,
+                rating: 4.5,
+                image: '/default-book.jpg'
+              };
+              setProduct(generatedProduct);
+              setIsLoading(false);
+              return;
+            }
+          }
+        }
+
+        setProduct(null);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error loading product:', error);
+        setIsLoading(false);
+      }
     }
+
+    loadProduct();
   }, [id]);
 
   useEffect(() => {
@@ -88,15 +127,15 @@ export default function ProductDetail() {
       if (!response.ok || !data.success) {
         throw new Error(data.error || 'Failed to create payment order');
       }
+
       const paymentSessionId = data.paymentSessionId;
       if (!window?.Cashfree || !paymentSessionId) {
         throw new Error('Cashfree SDK not loaded or session missing');
       }
+
       const cashfree = window.Cashfree({ mode: 'production' });
-      cashfree.checkout({
-        paymentSessionId,
-        redirectTarget: '_self',
-      });
+      cashfree.checkout({ paymentSessionId, redirectTarget: '_self' });
+
       setFormData({ customerName: '', customerEmail: '', customerPhone: '' });
       setIsModalOpen(false);
     } catch (error) {
@@ -188,71 +227,26 @@ export default function ProductDetail() {
       </main>
       <Footer />
 
-      {/* Modal for User Details */}
       {isModalOpen && (
         <div className="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="modal-content bg-white rounded-lg p-6 max-w-md w-full">
             <h2 className="text-xl font-semibold mb-4">Enter Your Details</h2>
             <form onSubmit={handleBuyNow} className="space-y-4">
               <div>
-                <label htmlFor="customerName" className="block text-sm font-medium text-gray-700">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  id="customerName"
-                  name="customerName"
-                  value={formData.customerName}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full"
-                  required
-                />
+                <label htmlFor="customerName" className="block text-sm font-medium text-gray-700">Name</label>
+                <input type="text" id="customerName" name="customerName" value={formData.customerName} onChange={handleInputChange} className="mt-1 block w-full" required />
               </div>
               <div>
-                <label htmlFor="customerEmail" className="block text-sm font-medium text-gray-700">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="customerEmail"
-                  name="customerEmail"
-                  value={formData.customerEmail}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full"
-                  required
-                />
+                <label htmlFor="customerEmail" className="block text-sm font-medium text-gray-700">Email</label>
+                <input type="email" id="customerEmail" name="customerEmail" value={formData.customerEmail} onChange={handleInputChange} className="mt-1 block w-full" required />
               </div>
               <div>
-                <label htmlFor="customerPhone" className="block text-sm font-medium text-gray-700">
-                  Phone (10 digits)
-                </label>
-                <input
-                  type="tel"
-                  id="customerPhone"
-                  name="customerPhone"
-                  value={formData.customerPhone}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full"
-                  required
-                />
+                <label htmlFor="customerPhone" className="block text-sm font-medium text-gray-700">Phone (10 digits)</label>
+                <input type="tel" id="customerPhone" name="customerPhone" value={formData.customerPhone} onChange={handleInputChange} className="mt-1 block w-full" required />
               </div>
-             <div className="flex justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className={`px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors ${
-                    isLoading ? 'opacity-75 cursor-not-allowed' : ''
-                  }`}
-                >
-                  {isLoading ? 'Processing...' : 'Proceed to Payment'}
-                </button>
+              <div className="flex justify-end space-x-2">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition-colors">Cancel</button>
+                <button type="submit" disabled={isLoading} className={`px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`}>{isLoading ? 'Processing...' : 'Proceed to Payment'}</button>
               </div>
             </form>
           </div>
