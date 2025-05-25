@@ -6,8 +6,8 @@ import 'react-toastify/dist/ReactToastify.css';
 
 export async function getStaticPaths() {
   const [productsRes, materialRes] = await Promise.all([
-    fetch('https://your-domain.com/products.json'),
-    fetch('https://your-domain.com/material.json'),
+    fetch(`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/products.json`),
+    fetch(`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/material.json`),
   ]);
 
   const products = await productsRes.json().catch(() => []);
@@ -35,8 +35,8 @@ export async function getStaticPaths() {
 
 export async function getStaticProps({ params }) {
   const [productsRes, materialRes] = await Promise.all([
-    fetch('https://your-domain.com/products.json'),
-    fetch('https://your-domain.com/material.json'),
+    fetch(`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/products.json`),
+    fetch(`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/material.json`),
   ]);
 
   const products = await productsRes.json().catch(() => []);
