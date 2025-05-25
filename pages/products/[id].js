@@ -1,5 +1,5 @@
-import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { ToastContainer } from 'react-toastify';
@@ -10,14 +10,13 @@ export default function ProductPage() {
   const { id } = router.query;
 
   const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!id) return;
 
     const fetchData = async () => {
       try {
-        // Fetch both JSON files
         const [productsRes, materialRes] = await Promise.all([
           fetch('/products.json'),
           fetch('/material.json'),
@@ -26,12 +25,11 @@ export default function ProductPage() {
         const productsData = await productsRes.json().catch(() => []);
         const materialData = await materialRes.json().catch(() => []);
 
-        // Transform material data into product-like objects (same as index.js)
         let idCounter = 1000;
         const materialProducts = Array.isArray(materialData)
           ? materialData.flatMap((group) =>
               (group.items || []).map((item) => ({
-                id: (idCounter++).toString(),
+                id: idCounter++,
                 name: item.label || 'Untitled',
                 link: `https://t.me/Material_eduhubkmrbot?start=${item.key}`,
                 description: `${item.label || 'Material'} - ${group.title || 'General'}`,
@@ -40,29 +38,24 @@ export default function ProductPage() {
             )
           : [];
 
-        // Combine products and material with string IDs for uniformity
         const allProducts = [
-          ...(productsData || []).map((p) => ({
-            ...p,
-            id: p.id.toString(),
-          })),
+          ...(productsData || []),
           ...materialProducts,
         ];
 
-        // Find product matching the id param
-        const foundProduct = allProducts.find((p) => p.id === id);
-        setProduct(foundProduct);
+        const found = allProducts.find((p) => p.id.toString() === id.toString());
+        setProduct(found || null);
       } catch (error) {
-        console.error('Error fetching product:', error);
+        console.error('Error loading product:', error);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
     fetchData();
   }, [id]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
@@ -93,16 +86,17 @@ export default function ProductPage() {
             <p className="text-lg md:text-xl max-w-2xl mx-auto">{product.description}</p>
           </div>
         </div>
-        <div className="container mx-auto px-4 py-12">
-          <div className="bg-white shadow-lg rounded-2xl p-8 max-w-3xl mx-auto text-center">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">{product.name}</h2>
+
+        <div className="container mx-auto px-4 py-12 max-w-3xl">
+          <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+            <h2 className="text-3xl font-bold mb-6 text-gray-800">{product.name}</h2>
             <p className="text-gray-700 mb-6">{product.description}</p>
-            <p className="text-sm text-gray-500 mb-6">Category: {product.category}</p>
+            <p className="text-gray-500 mb-8">Category: {product.category}</p>
             <a
               href={product.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block bg-indigo-600 text-white font-semibold px-6 py-3 rounded-xl hover:bg-indigo-700 transition"
+              className="inline-block bg-indigo-600 text-white font-semibold px-8 py-3 rounded-xl hover:bg-indigo-700 transition"
             >
               Buy Now
             </a>
