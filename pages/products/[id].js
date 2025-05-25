@@ -1,119 +1,287 @@
-// pages/products/[id].js
-
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import { toast } from 'react-toastify';
+import Rating from '../../components/Rating';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
-import Link from 'next/link';
 
-export default function ProductPage() {
+export default function ProductDetail() {
   const router = useRouter();
   const { id } = router.query;
   const [product, setProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isBuying, setIsBuying] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    customerName: '',
+    customerEmail: '',
+    customerPhone: '',
+  });
 
   useEffect(() => {
-    if (!id) return;
-
+  if (id) {
     const fetchData = async () => {
       try {
         const [productsRes, materialRes] = await Promise.all([
           fetch('/products.json'),
           fetch('/material.json'),
         ]);
+        const [products, materials] = await Promise.all([
+          productsRes.json(),
+          materialRes.json(),
+        ]);
 
-        const productsData = await productsRes.json().catch(() => []);
-        const materialData = await materialRes.json().catch(() => []);
+        const processedMaterials = Object.entries(materials).map(([key, item], index) => ({
+          id: 10000 + index, // Ensure unique IDs separate from products.json
+          name: item.label,
+          description: item.title || item.label,
+          image: '/default-book.jpg',
+          category: item.category || 'Study Material',
+          price: 10,
+          telegramLink: `https://t.me/${key}`,
+          features: ['Telegram Access', 'Verified Content', 'Instant Delivery'],
+          author: 'Team StudyStore',
+          rating: 4.5,
+        }));
 
-        const materialProducts = transformMaterialToProducts(materialData);
-        const combined = [...(productsData || []), ...materialProducts];
-        const matched = combined.find((item) => String(item.id) === String(id));
-
-        setProduct(matched || null);
+        const allItems = [...products, ...processedMaterials];
+        const found = allItems.find((p) => p.id === parseInt(id));
+        setProduct(found);
       } catch (error) {
-        console.error('Error fetching product:', error);
-        setProduct(null);
+        console.error('Error loading product:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchData();
-  }, [id]);
+  }
+}, [id]);
 
-  function transformMaterialToProducts(materialData) {
-    let idCounter = 1000;
-    const category = 'NEET,JEE,BOARDS';
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
+    script.async = true;
+    script.onload = () => console.log('Cashfree SDK loaded');
+    document.body.appendChild(script);
+  }, []);
 
-    if (!Array.isArray(materialData)) return [];
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-    return materialData.flatMap((group) =>
-      (group.items || []).map((item) => ({
-        id: idCounter++,
-        name: item.label || 'Untitled',
-        link: `https://t.me/Material_eduhubkmrbot?start=${item.key}`,
-        description: `${item.label || 'Material'} - ${group.title || 'General'}`,
-        category,
-        image: item.image || '/default-product.jpg',
-        price: item.price || 0,
-      }))
+  const validateForm = () => {
+    if (!formData.customerName || !formData.customerEmail || !formData.customerPhone) {
+      toast.error('Please fill in all fields.');
+      return false;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.customerEmail)) {
+      toast.error('Please enter a valid email.');
+      return false;
+    }
+    if (!/^\d{10}$/.test(formData.customerPhone)) {
+      toast.error('Please enter a valid 10-digit phone number.');
+      return false;
+    }
+    return true;
+  };
+
+  const handleBuyNow = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    setIsBuying(true);
+    try {
+      const response = await fetch('/api/createOrder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId: product.id,
+          productName: product.name,
+          amount: product.price,
+          telegramLink: product.telegramLink,
+          customerName: formData.customerName,
+          customerEmail: formData.customerEmail,
+          customerPhone: formData.customerPhone,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to create payment order');
+      }
+      const paymentSessionId = data.paymentSessionId;
+      if (!window?.Cashfree || !paymentSessionId) {
+        throw new Error('Cashfree SDK not loaded or session missing');
+      }
+      const cashfree = window.Cashfree({ mode: 'production' });
+      cashfree.checkout({
+        paymentSessionId,
+        redirectTarget: '_self',
+      });
+      setFormData({ customerName: '', customerEmail: '', customerPhone: '' });
+      setIsModalOpen(false);
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setIsBuying(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <p className="text-xl text-gray-600">Product not found</p>
+      </div>
     );
   }
 
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main className="flex-grow container mx-auto px-4 py-12">
-        {isLoading ? (
-          <div className="text-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading product...</p>
-          </div>
-        ) : !product ? (
-          <p className="text-center text-gray-500">Product not found.</p>
-        ) : (
-          <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-8">
-            {product.image && (
-              <img
-                src={product.image}
+      <main className="product-detail flex-grow">
+        <div className="container mx-auto px-4">
+          <div className="product-container grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="image-container">
+              <Image
+                src={product.image || '/default-book.jpg'}
                 alt={product.name}
-                className="w-full h-64 object-cover rounded mb-6"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 400px"
               />
-            )}
-            <h1 className="text-3xl font-bold mb-4 text-gray-800">{product.name}</h1>
-            <p className="text-gray-700 mb-4">{product.description}</p>
-            <p className="text-sm text-gray-500 mb-4">Category: {product.category}</p>
-            {product.price > 0 ? (
-              <>
-                <p className="text-xl font-semibold text-green-600 mb-4">
-                  Price: ₹{product.price}
-                </p>
-                <Link
-                  href={`/buy?id=${product.id}`}
-                  className="inline-block bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition"
+            </div>
+            <div className="content">
+              <h1>{product.name}</h1>
+              <Rating rating={product.rating} />
+              <p>{product.description}</p>
+              <div className="meta">
+                <p><strong>Author:</strong> {product.author}</p>
+                <p><strong>Category:</strong> {product.category}</p>
+              </div>
+              <div className="features">
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Features:</h3>
+                <ul className="list-disc list-inside space-y-1 text-gray-600">
+                  {product.features.map((feature, index) => (
+                    <li key={index}>{feature}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="flex items-center space-x-6">
+                <span className="price">₹{product.price}</span>
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  disabled={isBuying}
+                  className={`buy-button ${isBuying ? 'opacity-75 cursor-not-allowed' : ''}`}
                 >
-                  Buy Now
-                </Link>
-              </>
-            ) : (
-              <a
-                href={product.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 transition"
-              >
-                Access Material
-              </a>
-            )}
-            <div className="mt-6">
-              <Link href="/" className="text-indigo-600 hover:underline">
-                ← Back to Home
-              </Link>
+                  {isBuying ? (
+                    <span className="flex items-center">
+                      <svg
+                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Processing...
+                    </span>
+                  ) : (
+                    'Buy Now'
+                  )}
+                </button>
+              </div>
             </div>
           </div>
-        )}
+        </div>
       </main>
       <Footer />
+
+      {/* Modal for User Details */}
+      {isModalOpen && (
+        <div className="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="modal-content bg-white rounded-lg p-6 max-w-md w-full">
+            <h2 className="text-xl font-semibold mb-4">Enter Your Details</h2>
+            <form onSubmit={handleBuyNow} className="space-y-4">
+              <div>
+                <label htmlFor="customerName" className="block text-sm font-medium text-gray-700">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  id="customerName"
+                  name="customerName"
+                  value={formData.customerName}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="customerEmail" className="block text-sm font-medium text-gray-700">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="customerEmail"
+                  name="customerEmail"
+                  value={formData.customerEmail}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="customerPhone" className="block text-sm font-medium text-gray-700">
+                  Phone (10 digits)
+                </label>
+                <input
+                  type="tel"
+                  id="customerPhone"
+                  name="customerPhone"
+                  value={formData.customerPhone}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full"
+                  required
+                />
+              </div>
+             <div className="flex justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className={`px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors ${
+                    isLoading ? 'opacity-75 cursor-not-allowed' : ''
+                  }`}
+                >
+                  {isLoading ? 'Processing...' : 'Proceed to Payment'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
