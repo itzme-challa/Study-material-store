@@ -20,44 +20,46 @@ export default function ProductDetail() {
   });
 
   useEffect(() => {
-  if (id) {
+    if (!id) return;
+
     const fetchData = async () => {
       try {
         const [productsRes, materialRes] = await Promise.all([
           fetch('/products.json'),
           fetch('/material.json'),
         ]);
+
         const [products, materials] = await Promise.all([
           productsRes.json(),
           materialRes.json(),
         ]);
 
-        const processedMaterials = Object.entries(materials).map(([key, item], index) => ({
-          id: 10000 + index, // Ensure unique IDs separate from products.json
+        const materialItems = Object.entries(materials).map(([key, item], index) => ({
+          id: 10000 + index,
           name: item.label,
-          description: item.title || item.label,
-          image: '/default-book.jpg',
-          category: item.category || 'Study Material',
+          description: item.title || 'Study Material',
+          author: 'Contributor',
+          category: item.category || 'NEET',
           price: 10,
           telegramLink: `https://t.me/${key}`,
-          features: ['Telegram Access', 'Verified Content', 'Instant Delivery'],
-          author: 'Team StudyStore',
-          rating: 4.5,
+          image: '/material-default.jpg',
+          rating: 4,
+          features: ['Digital PDF access', 'One-time purchase', 'Secure download'],
         }));
 
-        const allItems = [...products, ...processedMaterials];
-        const found = allItems.find((p) => p.id === parseInt(id));
-        setProduct(found);
-      } catch (error) {
-        console.error('Error loading product:', error);
+        const allItems = [...products, ...materialItems];
+        const foundProduct = allItems.find((p) => String(p.id) === String(id));
+
+        setProduct(foundProduct);
+      } catch (err) {
+        console.error('Failed to fetch data:', err);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchData();
-  }
-}, [id]);
+  }, [id]);
 
   useEffect(() => {
     const script = document.createElement('script');
@@ -112,15 +114,18 @@ export default function ProductDetail() {
       if (!response.ok || !data.success) {
         throw new Error(data.error || 'Failed to create payment order');
       }
+
       const paymentSessionId = data.paymentSessionId;
       if (!window?.Cashfree || !paymentSessionId) {
         throw new Error('Cashfree SDK not loaded or session missing');
       }
+
       const cashfree = window.Cashfree({ mode: 'production' });
       cashfree.checkout({
         paymentSessionId,
         redirectTarget: '_self',
       });
+
       setFormData({ customerName: '', customerEmail: '', customerPhone: '' });
       setIsModalOpen(false);
     } catch (error) {
@@ -152,12 +157,12 @@ export default function ProductDetail() {
       <main className="product-detail flex-grow">
         <div className="container mx-auto px-4">
           <div className="product-container grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="image-container">
+            <div className="image-container relative h-[300px] lg:h-[500px] w-full">
               <Image
                 src={product.image || '/default-book.jpg'}
                 alt={product.name}
                 fill
-                className="object-cover"
+                className="object-cover rounded"
                 sizes="(max-width: 768px) 100vw, 400px"
               />
             </div>
@@ -172,17 +177,19 @@ export default function ProductDetail() {
               <div className="features">
                 <h3 className="text-lg font-semibold text-gray-700 mb-2">Features:</h3>
                 <ul className="list-disc list-inside space-y-1 text-gray-600">
-                  {product.features.map((feature, index) => (
+                  {product.features?.map((feature, index) => (
                     <li key={index}>{feature}</li>
                   ))}
                 </ul>
               </div>
-              <div className="flex items-center space-x-6">
-                <span className="price">₹{product.price}</span>
+              <div className="flex items-center space-x-6 mt-4">
+                <span className="price font-semibold text-lg">₹{product.price}</span>
                 <button
                   onClick={() => setIsModalOpen(true)}
                   disabled={isBuying}
-                  className={`buy-button ${isBuying ? 'opacity-75 cursor-not-allowed' : ''}`}
+                  className={`buy-button bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition ${
+                    isBuying ? 'opacity-75 cursor-not-allowed' : ''
+                  }`}
                 >
                   {isBuying ? (
                     <span className="flex items-center">
@@ -212,7 +219,6 @@ export default function ProductDetail() {
       </main>
       <Footer />
 
-      {/* Modal for User Details */}
       {isModalOpen && (
         <div className="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="modal-content bg-white rounded-lg p-6 max-w-md w-full">
@@ -228,7 +234,7 @@ export default function ProductDetail() {
                   name="customerName"
                   value={formData.customerName}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full"
+                  className="mt-1 block w-full border rounded px-3 py-2"
                   required
                 />
               </div>
@@ -242,7 +248,7 @@ export default function ProductDetail() {
                   name="customerEmail"
                   value={formData.customerEmail}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full"
+                  className="mt-1 block w-full border rounded px-3 py-2"
                   required
                 />
               </div>
@@ -256,11 +262,11 @@ export default function ProductDetail() {
                   name="customerPhone"
                   value={formData.customerPhone}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full"
+                  className="mt-1 block w-full border rounded px-3 py-2"
                   required
                 />
               </div>
-             <div className="flex justify-end space-x-2">
+              <div className="flex justify-end space-x-2 pt-2">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
@@ -270,12 +276,10 @@ export default function ProductDetail() {
                 </button>
                 <button
                   type="submit"
-                  disabled={isLoading}
-                  className={`px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors ${
-                    isLoading ? 'opacity-75 cursor-not-allowed' : ''
-                  }`}
+                  disabled={isBuying}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                 >
-                  {isLoading ? 'Processing...' : 'Proceed to Payment'}
+                  {isBuying ? 'Processing...' : 'Proceed to Payment'}
                 </button>
               </div>
             </form>
