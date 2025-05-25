@@ -1,5 +1,3 @@
-// pages/products/[id].js
-
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
@@ -31,63 +29,62 @@ export default function ProductDetail() {
     document.body.appendChild(script);
   }, []);
 
-  // Load product data
+  // Load product data (from products.json and material.json)
   useEffect(() => {
-  if (!id) return;
+    if (!id) return;
 
-  async function loadProduct() {
-    setIsLoading(true);
-    try {
-      const [productsData, materialData] = await Promise.all([
-        fetch('/products.json').then(res => res.json()),
-        fetch('/material.json').then(res => res.json()),
-      ]);
+    async function loadProduct() {
+      setIsLoading(true);
+      try {
+        const [productsData, materialData] = await Promise.all([
+          fetch('/products.json').then(res => res.json()),
+          fetch('/material.json').then(res => res.json()),
+        ]);
 
-      console.log('Products Data:', productsData);
-      console.log('Material Data:', materialData);
-
-      const foundProduct = productsData.find(p => p.id === parseInt(id));
-      if (foundProduct) {
-        setProduct(foundProduct);
-        return;
-      }
-
-      for (const section of materialData) {
-        const item = section.items.find(i => i.key === id);
-        if (item) {
-          const generated = {
-            id,
-            name: item.label,
-            description: `${item.label} from ${section.title}`,
-            category: 'NEET, JEE, BOARDS',
-            price: 29,
-            author: 'EduHubKMR',
-            features: [
-              'PDF + Telegram Access',
-              'Instant Delivery After Payment',
-              'Works on Any Device',
-            ],
-            telegramLink: `https://t.me/Material_eduhubkmrbot?start=${id}`,
-            rating: 4.5,
-            image: '/default-book.jpg',
-          };
-          setProduct(generated);
+        // Try to find product in products.json by numeric id
+        const foundProduct = productsData.find(p => p.id === parseInt(id));
+        if (foundProduct) {
+          setProduct(foundProduct);
           return;
         }
+
+        // Otherwise, look for id in material.json (key matching)
+        // materialData is array of sections with items inside
+        for (const section of materialData) {
+          const item = section.items.find(i => i.key === id);
+          if (item) {
+            const generatedProduct = {
+              id, // string id from key
+              name: item.label,
+              description: `${item.label} from ${section.title}`,
+              category: 'NEET, JEE, BOARDS',
+              price: 29,
+              author: 'EduHubKMR',
+              features: [
+                'PDF + Telegram Access',
+                'Instant Delivery After Payment',
+                'Works on Any Device',
+              ],
+              telegramLink: `https://t.me/Material_eduhubkmrbot?start=${id}`,
+              rating: 4.5,
+              image: '/default-book.jpg',
+            };
+            setProduct(generatedProduct);
+            return;
+          }
+        }
+
+        // Not found anywhere
+        setProduct(null);
+      } catch (err) {
+        console.error('Failed to load product', err);
+      } finally {
+        setIsLoading(false);
       }
-
-      setProduct(null);
-    } catch (err) {
-      console.error('Failed to load product', err);
-    } finally {
-      setIsLoading(false);
     }
-  }
 
-  loadProduct();
-}, [id]);
-
-    
+    loadProduct();
+  }, [id]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
