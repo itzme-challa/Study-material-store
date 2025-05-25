@@ -33,59 +33,61 @@ export default function ProductDetail() {
 
   // Load product data
   useEffect(() => {
-    if (!id) return;
+  if (!id) return;
 
-    async function loadProduct() {
-      setIsLoading(true);
-      try {
-        const [productsData, materialData] = await Promise.all([
-          fetch('/products.json').then(res => res.json()),
-          fetch('/material.json').then(res => res.json()),
-        ]);
+  async function loadProduct() {
+    setIsLoading(true);
+    try {
+      const [productsData, materialData] = await Promise.all([
+        fetch('/products.json').then(res => res.json()),
+        fetch('/material.json').then(res => res.json()),
+      ]);
 
-        let foundProduct = productsData.find(p => String(p.id) === String(id));
-        if (foundProduct) {
-          setProduct(foundProduct);
-        } else {
-          // Try to find in material.json
-          for (const section of materialData) {
-            const item = section.items.find(i => String(i.key) === String(id));
-            if (item) {
-              foundProduct = {
-                id,
-                name: item.label,
-                description: `${item.label} from ${section.title}`,
-                category: 'NEET, JEE, BOARDS',
-                price: 29,
-                author: 'EduHubKMR',
-                features: [
-                  'PDF + Telegram Access',
-                  'Instant Delivery After Payment',
-                  'Works on Any Device',
-                ],
-                telegramLink: `https://t.me/Material_eduhubkmrbot?start=${id}`,
-                rating: 4.5,
-                image: '/default-book.jpg',
-              };
-              break;
-            }
-          }
-          if (foundProduct) {
-            setProduct(foundProduct);
-          } else {
-            setProduct(null);
-          }
-        }
-      } catch (error) {
-        console.error('Error loading product:', error);
-        setProduct(null);
-      } finally {
-        setIsLoading(false);
+      console.log('Products Data:', productsData);
+      console.log('Material Data:', materialData);
+
+      const foundProduct = productsData.find(p => p.id === parseInt(id));
+      if (foundProduct) {
+        setProduct(foundProduct);
+        return;
       }
-    }
 
-    loadProduct();
-  }, [id]);
+      for (const section of materialData) {
+        const item = section.items.find(i => i.key === id);
+        if (item) {
+          const generated = {
+            id,
+            name: item.label,
+            description: `${item.label} from ${section.title}`,
+            category: 'NEET, JEE, BOARDS',
+            price: 29,
+            author: 'EduHubKMR',
+            features: [
+              'PDF + Telegram Access',
+              'Instant Delivery After Payment',
+              'Works on Any Device',
+            ],
+            telegramLink: `https://t.me/Material_eduhubkmrbot?start=${id}`,
+            rating: 4.5,
+            image: '/default-book.jpg',
+          };
+          setProduct(generated);
+          return;
+        }
+      }
+
+      setProduct(null);
+    } catch (err) {
+      console.error('Failed to load product', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  loadProduct();
+}, [id]);
+
+    
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
