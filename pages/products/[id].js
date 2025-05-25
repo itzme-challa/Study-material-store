@@ -1,257 +1,96 @@
+// pages/products/[id].js
+
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
-import { toast } from 'react-toastify';
-import Rating from '../../components/Rating';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import Link from 'next/link';
 
-export default function ProductDetail() {
+export default function ProductPage() {
   const router = useRouter();
   const { id } = router.query;
-
   const [product, setProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isBuying, setIsBuying] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    customerName: '',
-    customerEmail: '',
-    customerPhone: '',
-  });
 
-  // Load Cashfree SDK
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
-    script.async = true;
-    script.onload = () => console.log('Cashfree SDK loaded');
-    document.body.appendChild(script);
-  }, []);
-
-  // Load product data (from products.json and material.json)
   useEffect(() => {
     if (!id) return;
 
-    async function loadProduct() {
-      setIsLoading(true);
+    const fetchData = async () => {
       try {
-        const [productsData, materialData] = await Promise.all([
-          fetch('/products.json').then(res => res.json()),
-          fetch('/material.json').then(res => res.json()),
+        const [productsRes, materialRes] = await Promise.all([
+          fetch('/products.json'),
+          fetch('/material.json'),
         ]);
 
-        // Try to find product in products.json by numeric id
-        const foundProduct = productsData.find(p => p.id === parseInt(id));
-        if (foundProduct) {
-          setProduct(foundProduct);
-          return;
-        }
+        const productsData = await productsRes.json().catch(() => []);
+        const materialData = await materialRes.json().catch(() => []);
 
-        // Otherwise, look for id in material.json (key matching)
-        // materialData is array of sections with items inside
-        for (const section of materialData) {
-          const item = section.items.find(i => i.key === id);
-          if (item) {
-            const generatedProduct = {
-              id, // string id from key
-              name: item.label,
-              description: `${item.label} from ${section.title}`,
-              category: 'NEET, JEE, BOARDS',
-              price: 29,
-              author: 'EduHubKMR',
-              features: [
-                'PDF + Telegram Access',
-                'Instant Delivery After Payment',
-                'Works on Any Device',
-              ],
-              telegramLink: `https://t.me/Material_eduhubkmrbot?start=${id}`,
-              rating: 4.5,
-              image: '/default-book.jpg',
-            };
-            setProduct(generatedProduct);
-            return;
-          }
-        }
+        const materialProducts = transformMaterialToProducts(materialData);
+        const combined = [...(productsData || []), ...materialProducts];
+        const matched = combined.find((item) => String(item.id) === String(id));
 
-        // Not found anywhere
+        setProduct(matched || null);
+      } catch (error) {
+        console.error('Error fetching product:', error);
         setProduct(null);
-      } catch (err) {
-        console.error('Failed to load product', err);
       } finally {
         setIsLoading(false);
       }
-    }
+    };
 
-    loadProduct();
+    fetchData();
   }, [id]);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  function transformMaterialToProducts(materialData) {
+    let idCounter = 1000;
+    const category = 'NEET,JEE,BOARDS';
 
-  const validateForm = () => {
-    const { customerName, customerEmail, customerPhone } = formData;
-    if (!customerName || !customerEmail || !customerPhone) {
-      toast.error('Please fill in all fields.');
-      return false;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
-      toast.error('Invalid email format.');
-      return false;
-    }
-    if (!/^\d{10}$/.test(customerPhone)) {
-      toast.error('Phone number must be 10 digits.');
-      return false;
-    }
-    return true;
-  };
+    if (!Array.isArray(materialData)) return [];
 
-  const handleBuyNow = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-
-    setIsBuying(true);
-    try {
-      const res = await fetch('/api/createOrder', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          productId: product.id,
-          productName: product.name,
-          amount: product.price,
-          telegramLink: product.telegramLink,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Failed to create payment order.');
-      }
-
-      if (!window?.Cashfree || !data.paymentSessionId) {
-        throw new Error('Cashfree SDK not ready.');
-      }
-
-      const cashfree = window.Cashfree({ mode: 'production' });
-      cashfree.checkout({ paymentSessionId: data.paymentSessionId, redirectTarget: '_self' });
-
-      setFormData({ customerName: '', customerEmail: '', customerPhone: '' });
-      setIsModalOpen(false);
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
-      setIsBuying(false);
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
-      </div>
-    );
-  }
-
-  if (!product) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <p className="text-xl text-gray-600">Product not found</p>
-      </div>
+    return materialData.flatMap((group) =>
+      (group.items || []).map((item) => ({
+        id: idCounter++,
+        name: item.label || 'Untitled',
+        link: `https://t.me/Material_eduhubkmrbot?start=${item.key}`,
+        description: `${item.label || 'Material'} - ${group.title || 'General'}`,
+        category,
+      }))
     );
   }
 
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main className="flex-grow py-10 px-4">
-        <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10">
-          <div className="relative h-80 w-full">
-            <Image
-              src={product.image || '/default-book.jpg'}
-              alt={product.name}
-              fill
-              className="object-cover rounded-lg"
-              sizes="(max-width: 768px) 100vw, 400px"
-            />
+      <main className="flex-grow container mx-auto px-4 py-12">
+        {isLoading ? (
+          <div className="text-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading product...</p>
           </div>
-          <div>
-            <h1 className="text-2xl font-semibold">{product.name}</h1>
-            <Rating rating={product.rating} />
-            <p className="text-gray-700 my-4">{product.description}</p>
-            <p><strong>Author:</strong> {product.author}</p>
-            <p><strong>Category:</strong> {product.category}</p>
-            <div className="mt-4">
-              <h3 className="text-lg font-medium">Features:</h3>
-              <ul className="list-disc pl-5 text-gray-700">
-                {product.features.map((f, i) => <li key={i}>{f}</li>)}
-              </ul>
-            </div>
-            <div className="mt-6 flex items-center space-x-4">
-              <span className="text-2xl font-bold text-indigo-600">₹{product.price}</span>
-              <button
-                onClick={() => setIsModalOpen(true)}
-                disabled={isBuying}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-md"
-              >
-                {isBuying ? 'Processing...' : 'Buy Now'}
-              </button>
+        ) : !product ? (
+          <p className="text-center text-gray-500">Product not found.</p>
+        ) : (
+          <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-8">
+            <h1 className="text-3xl font-bold mb-4 text-gray-800">{product.name}</h1>
+            <p className="text-gray-700 mb-4">{product.description}</p>
+            <p className="text-sm text-gray-500 mb-6">Category: {product.category}</p>
+            <a
+              href={product.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 transition"
+            >
+              Access Material
+            </a>
+            <div className="mt-6">
+              <Link href="/" className="text-indigo-600 hover:underline">
+                ← Back to Home
+              </Link>
             </div>
           </div>
-        </div>
+        )}
       </main>
       <Footer />
-
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-            <h2 className="text-xl font-semibold mb-4">Enter Your Details</h2>
-            <form onSubmit={handleBuyNow} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Name</label>
-                <input
-                  type="text"
-                  name="customerName"
-                  value={formData.customerName}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full border rounded p-2"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Email</label>
-                <input
-                  type="email"
-                  name="customerEmail"
-                  value={formData.customerEmail}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full border rounded p-2"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Phone</label>
-                <input
-                  type="tel"
-                  name="customerPhone"
-                  value={formData.customerPhone}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full border rounded p-2"
-                  required
-                />
-              </div>
-              <div className="flex justify-end space-x-2">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-300 rounded">Cancel</button>
-                <button type="submit" disabled={isBuying} className="px-4 py-2 bg-indigo-600 text-white rounded">
-                  {isBuying ? 'Processing...' : 'Proceed to Payment'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
