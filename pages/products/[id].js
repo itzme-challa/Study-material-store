@@ -1,3 +1,5 @@
+// pages/products/[id].js
+
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
@@ -9,6 +11,7 @@ import Footer from '../../components/Footer';
 export default function ProductDetail() {
   const router = useRouter();
   const { id } = router.query;
+
   const [product, setProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isBuying, setIsBuying] = useState(false);
@@ -19,61 +22,7 @@ export default function ProductDetail() {
     customerPhone: '',
   });
 
-  useEffect(() => {
-    if (!id) return;
-
-    async function loadProduct() {
-      try {
-        const [productRes, materialRes] = await Promise.all([
-          fetch('/products.json').then(res => res.json()),
-          fetch('/material.json').then(res => res.json())
-        ]);
-
-        let found = productRes.find(p => p.id === parseInt(id));
-        if (found) {
-          setProduct(found);
-          setIsLoading(false);
-          return;
-        }
-
-        // If not found, try to extract from material.json
-        for (const section of materialRes) {
-          for (const item of section.items) {
-            if (item.key === id) {
-              const generatedProduct = {
-                id: id,
-                name: item.label,
-                description: `${item.label} from ${section.title}`,
-                category: 'NEET, JEE, BOARDS',
-                price: 29,
-                author: 'EduHubKMR',
-                features: [
-                  'PDF + Telegram Access',
-                  'Instant Delivery After Payment',
-                  'Works on Any Device'
-                ],
-                telegramLink: `https://t.me/Material_eduhubkmrbot?start=${id}`,
-                rating: 4.5,
-                image: '/default-book.jpg'
-              };
-              setProduct(generatedProduct);
-              setIsLoading(false);
-              return;
-            }
-          }
-        }
-
-        setProduct(null);
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Error loading product:', error);
-        setIsLoading(false);
-      }
-    }
-
-    loadProduct();
-  }, [id]);
-
+  // Load Cashfree SDK
   useEffect(() => {
     const script = document.createElement('script');
     script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
@@ -82,22 +31,76 @@ export default function ProductDetail() {
     document.body.appendChild(script);
   }, []);
 
+  // Load product from either products.json or material.json
+  useEffect(() => {
+    if (!id) return;
+
+    async function loadProduct() {
+      setIsLoading(true);
+      try {
+        const [productsData, materialData] = await Promise.all([
+          fetch('/products.json').then(res => res.json()),
+          fetch('/material.json').then(res => res.json()),
+        ]);
+
+        const foundProduct = productsData.find(p => p.id === parseInt(id));
+        if (foundProduct) {
+          setProduct(foundProduct);
+          return;
+        }
+
+        for (const section of materialData) {
+          const item = section.items.find(i => i.key === id);
+          if (item) {
+            const generated = {
+              id,
+              name: item.label,
+              description: `${item.label} from ${section.title}`,
+              category: 'NEET, JEE, BOARDS',
+              price: 29,
+              author: 'EduHubKMR',
+              features: [
+                'PDF + Telegram Access',
+                'Instant Delivery After Payment',
+                'Works on Any Device',
+              ],
+              telegramLink: `https://t.me/Material_eduhubkmrbot?start=${id}`,
+              rating: 4.5,
+              image: '/default-book.jpg',
+            };
+            setProduct(generated);
+            return;
+          }
+        }
+
+        setProduct(null);
+      } catch (err) {
+        console.error('Failed to load product', err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadProduct();
+  }, [id]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const validateForm = () => {
-    if (!formData.customerName || !formData.customerEmail || !formData.customerPhone) {
+    const { customerName, customerEmail, customerPhone } = formData;
+    if (!customerName || !customerEmail || !customerPhone) {
       toast.error('Please fill in all fields.');
       return false;
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.customerEmail)) {
-      toast.error('Please enter a valid email.');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
+      toast.error('Invalid email format.');
       return false;
     }
-    if (!/^\d{10}$/.test(formData.customerPhone)) {
-      toast.error('Please enter a valid 10-digit phone number.');
+    if (!/^\d{10}$/.test(customerPhone)) {
+      toast.error('Phone number must be 10 digits.');
       return false;
     }
     return true;
@@ -109,37 +112,34 @@ export default function ProductDetail() {
 
     setIsBuying(true);
     try {
-      const response = await fetch('/api/createOrder', {
+      const res = await fetch('/api/createOrder', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          ...formData,
           productId: product.id,
           productName: product.name,
           amount: product.price,
           telegramLink: product.telegramLink,
-          customerName: formData.customerName,
-          customerEmail: formData.customerEmail,
-          customerPhone: formData.customerPhone,
         }),
       });
 
-      const data = await response.json();
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Failed to create payment order');
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to create payment order.');
       }
 
-      const paymentSessionId = data.paymentSessionId;
-      if (!window?.Cashfree || !paymentSessionId) {
-        throw new Error('Cashfree SDK not loaded or session missing');
+      if (!window?.Cashfree || !data.paymentSessionId) {
+        throw new Error('Cashfree SDK not ready.');
       }
 
       const cashfree = window.Cashfree({ mode: 'production' });
-      cashfree.checkout({ paymentSessionId, redirectTarget: '_self' });
+      cashfree.checkout({ paymentSessionId: data.paymentSessionId, redirectTarget: '_self' });
 
       setFormData({ customerName: '', customerEmail: '', customerPhone: '' });
       setIsModalOpen(false);
-    } catch (error) {
-      toast.error(error.message);
+    } catch (err) {
+      toast.error(err.message);
     } finally {
       setIsBuying(false);
     }
@@ -164,63 +164,38 @@ export default function ProductDetail() {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main className="product-detail flex-grow">
-        <div className="container mx-auto px-4">
-          <div className="product-container grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="image-container">
-              <Image
-                src={product.image || '/default-book.jpg'}
-                alt={product.name}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 400px"
-              />
+      <main className="flex-grow py-10 px-4">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10">
+          <div className="relative h-80 w-full">
+            <Image
+              src={product.image || '/default-book.jpg'}
+              alt={product.name}
+              fill
+              className="object-cover rounded-lg"
+              sizes="(max-width: 768px) 100vw, 400px"
+            />
+          </div>
+          <div>
+            <h1 className="text-2xl font-semibold">{product.name}</h1>
+            <Rating rating={product.rating} />
+            <p className="text-gray-700 my-4">{product.description}</p>
+            <p><strong>Author:</strong> {product.author}</p>
+            <p><strong>Category:</strong> {product.category}</p>
+            <div className="mt-4">
+              <h3 className="text-lg font-medium">Features:</h3>
+              <ul className="list-disc pl-5 text-gray-700">
+                {product.features.map((f, i) => <li key={i}>{f}</li>)}
+              </ul>
             </div>
-            <div className="content">
-              <h1>{product.name}</h1>
-              <Rating rating={product.rating} />
-              <p>{product.description}</p>
-              <div className="meta">
-                <p><strong>Author:</strong> {product.author}</p>
-                <p><strong>Category:</strong> {product.category}</p>
-              </div>
-              <div className="features">
-                <h3 className="text-lg font-semibold text-gray-700 mb-2">Features:</h3>
-                <ul className="list-disc list-inside space-y-1 text-gray-600">
-                  {product.features.map((feature, index) => (
-                    <li key={index}>{feature}</li>
-                  ))}
-                </ul>
-              </div>
-              <div className="flex items-center space-x-6">
-                <span className="price">₹{product.price}</span>
-                <button
-                  onClick={() => setIsModalOpen(true)}
-                  disabled={isBuying}
-                  className={`buy-button ${isBuying ? 'opacity-75 cursor-not-allowed' : ''}`}
-                >
-                  {isBuying ? (
-                    <span className="flex items-center">
-                      <svg
-                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
-                      Processing...
-                    </span>
-                  ) : (
-                    'Buy Now'
-                  )}
-                </button>
-              </div>
+            <div className="mt-6 flex items-center space-x-4">
+              <span className="text-2xl font-bold text-indigo-600">₹{product.price}</span>
+              <button
+                onClick={() => setIsModalOpen(true)}
+                disabled={isBuying}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-md"
+              >
+                {isBuying ? 'Processing...' : 'Buy Now'}
+              </button>
             </div>
           </div>
         </div>
@@ -228,25 +203,48 @@ export default function ProductDetail() {
       <Footer />
 
       {isModalOpen && (
-        <div className="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="modal-content bg-white rounded-lg p-6 max-w-md w-full">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
             <h2 className="text-xl font-semibold mb-4">Enter Your Details</h2>
             <form onSubmit={handleBuyNow} className="space-y-4">
               <div>
-                <label htmlFor="customerName" className="block text-sm font-medium text-gray-700">Name</label>
-                <input type="text" id="customerName" name="customerName" value={formData.customerName} onChange={handleInputChange} className="mt-1 block w-full" required />
+                <label className="block text-sm font-medium text-gray-700">Name</label>
+                <input
+                  type="text"
+                  name="customerName"
+                  value={formData.customerName}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full border rounded p-2"
+                  required
+                />
               </div>
               <div>
-                <label htmlFor="customerEmail" className="block text-sm font-medium text-gray-700">Email</label>
-                <input type="email" id="customerEmail" name="customerEmail" value={formData.customerEmail} onChange={handleInputChange} className="mt-1 block w-full" required />
+                <label className="block text-sm font-medium text-gray-700">Email</label>
+                <input
+                  type="email"
+                  name="customerEmail"
+                  value={formData.customerEmail}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full border rounded p-2"
+                  required
+                />
               </div>
               <div>
-                <label htmlFor="customerPhone" className="block text-sm font-medium text-gray-700">Phone (10 digits)</label>
-                <input type="tel" id="customerPhone" name="customerPhone" value={formData.customerPhone} onChange={handleInputChange} className="mt-1 block w-full" required />
+                <label className="block text-sm font-medium text-gray-700">Phone</label>
+                <input
+                  type="tel"
+                  name="customerPhone"
+                  value={formData.customerPhone}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full border rounded p-2"
+                  required
+                />
               </div>
               <div className="flex justify-end space-x-2">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition-colors">Cancel</button>
-                <button type="submit" disabled={isLoading} className={`px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`}>{isLoading ? 'Processing...' : 'Proceed to Payment'}</button>
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-300 rounded">Cancel</button>
+                <button type="submit" disabled={isBuying} className="px-4 py-2 bg-indigo-600 text-white rounded">
+                  {isBuying ? 'Processing...' : 'Proceed to Payment'}
+                </button>
               </div>
             </form>
           </div>
