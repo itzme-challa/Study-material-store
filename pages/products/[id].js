@@ -51,7 +51,7 @@ export default function ProductDetail() {
               author: '', // optional, no author info
               features: [], // optional, empty features
               telegramLink: `https://t.me/Material_eduhubkmrbot?start=${item.key}`,
-              image: 'public/images/default-book.jpg', // fallback image for materials
+              image: '/default-book.jpg', // fallback image for materials
             });
           });
         });
