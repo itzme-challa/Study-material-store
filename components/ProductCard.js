@@ -4,6 +4,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Rating from './Rating';
 
+// Constants for default values
+const DEFAULT_IMAGE = '/images/default-book.jpg';
+const DEFAULT_PRICE = 10;
+
 export default function ProductCard({ product }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -59,7 +63,7 @@ export default function ProductCard({ product }) {
         body: JSON.stringify({
           productId: product.id,
           productName: product.name,
-          amount: product.price || 1, // fallback to 1 if no price
+          amount: product.price || DEFAULT_PRICE, // Use default price of 10
           telegramLink: product.telegramLink || product.link || '',
           customerName: formData.customerName,
           customerEmail: formData.customerEmail,
@@ -97,7 +101,7 @@ export default function ProductCard({ product }) {
       <Link href={`/products/${product.id}`}>
         <div className="image-container relative w-full h-64 cursor-pointer">
           <Image
-            src={product.image || '/images/default-book.jpg'}
+            src={product.image || DEFAULT_IMAGE} // Use constant for default image
             alt={product.name}
             fill
             className="object-cover"
@@ -120,7 +124,7 @@ export default function ProductCard({ product }) {
 
         <div className="flex justify-between items-center mt-4">
           <span className="text-2xl font-bold text-indigo-600">
-            ₹{product.price ?? 'Free'}
+            ₹{product.price ?? DEFAULT_PRICE} {/* Use default price of 10 */}
           </span>
           <button
             onClick={() => setIsModalOpen(true)}
