@@ -17,6 +17,7 @@ export default function ProductPage() {
 
     const fetchData = async () => {
       try {
+        // Fetch both JSON files
         const [productsRes, materialRes] = await Promise.all([
           fetch('/products.json'),
           fetch('/material.json'),
@@ -25,17 +26,21 @@ export default function ProductPage() {
         const productsData = await productsRes.json().catch(() => []);
         const materialData = await materialRes.json().catch(() => []);
 
+        // Transform material data into product-like objects (same as index.js)
         let idCounter = 1000;
-        const materialProducts = materialData.flatMap((group) =>
-          (group.items || []).map((item) => ({
-            id: (idCounter++).toString(),
-            name: item.label || 'Untitled',
-            link: `https://t.me/Material_eduhubkmrbot?start=${item.key}`,
-            description: `${item.label || 'Material'} - ${group.title || 'General'}`,
-            category: 'NEET,JEE,BOARDS',
-          }))
-        );
+        const materialProducts = Array.isArray(materialData)
+          ? materialData.flatMap((group) =>
+              (group.items || []).map((item) => ({
+                id: (idCounter++).toString(),
+                name: item.label || 'Untitled',
+                link: `https://t.me/Material_eduhubkmrbot?start=${item.key}`,
+                description: `${item.label || 'Material'} - ${group.title || 'General'}`,
+                category: 'NEET,JEE,BOARDS',
+              }))
+            )
+          : [];
 
+        // Combine products and material with string IDs for uniformity
         const allProducts = [
           ...(productsData || []).map((p) => ({
             ...p,
@@ -44,10 +49,11 @@ export default function ProductPage() {
           ...materialProducts,
         ];
 
+        // Find product matching the id param
         const foundProduct = allProducts.find((p) => p.id === id);
         setProduct(foundProduct);
-      } catch (err) {
-        console.error('Error fetching product:', err);
+      } catch (error) {
+        console.error('Error fetching product:', error);
       } finally {
         setLoading(false);
       }
