@@ -1,3 +1,4 @@
+// pages/products/[id].js
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
@@ -9,7 +10,6 @@ import Footer from '../../components/Footer';
 export default function ProductDetail() {
   const router = useRouter();
   const { id } = router.query;
-
   const [product, setProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isBuying, setIsBuying] = useState(false);
@@ -62,14 +62,15 @@ export default function ProductDetail() {
       (group.items || []).map((item) => ({
         id: idCounter++,
         name: item.label || 'Untitled',
-        telegramLink: `https://t.me/Material_eduhubkmrbot?start=${item.key}`,
+        link: `https://t.me/Material_eduhubkmrbot?start=${item.key}`,
         description: `${item.label || 'Material'} - ${group.title || 'General'}`,
         category,
-        author: 'Unknown',
-        price: 99,
-        rating: 4.5,
+        price: 49,
+        features: ['Instant access', 'Telegram-based delivery'],
+        author: 'EduHubKMR',
         image: '/default-book.jpg',
-        features: ['Instant Telegram access', 'PDF format', 'Lifetime access'],
+        telegramLink: item.key,
+        rating: 4.5,
       }))
     );
   }
@@ -128,14 +129,9 @@ export default function ProductDetail() {
         throw new Error(data.error || 'Failed to create payment order');
       }
 
-      const paymentSessionId = data.paymentSessionId;
-      if (!window?.Cashfree || !paymentSessionId) {
-        throw new Error('Cashfree SDK not loaded or session missing');
-      }
-
       const cashfree = window.Cashfree({ mode: 'production' });
       cashfree.checkout({
-        paymentSessionId,
+        paymentSessionId: data.paymentSessionId,
         redirectTarget: '_self',
       });
 
@@ -151,64 +147,53 @@ export default function ProductDetail() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-indigo-600"></div>
       </div>
     );
   }
 
   if (!product) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <p className="text-xl text-gray-600">Product not found</p>
+      <div className="flex justify-center items-center min-h-screen text-gray-600">
+        <p className="text-xl">Product not found</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-gray-50">
       <Navbar />
-      <main className="product-detail flex-grow">
-        <div className="container mx-auto px-4">
-          <div className="product-container grid grid-cols-1 lg:grid-cols-2 gap-8 py-8">
-            <div className="relative w-full aspect-square">
-              <Image
-                src={product.image || '/default-book.jpg'}
-                alt={product.name}
-                fill
-                className="object-cover rounded-xl"
-                sizes="(max-width: 768px) 100vw, 400px"
-              />
+      <main className="flex-grow container mx-auto px-4 py-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-white shadow-md rounded-xl p-6">
+          <div className="relative w-full aspect-[4/3] rounded-lg overflow-hidden">
+            <Image
+              src={product.image || '/default-book.jpg'}
+              alt={product.name}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 400px"
+            />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800 mb-2">{product.name}</h1>
+            <Rating rating={product.rating} />
+            <p className="text-gray-600 mt-2 mb-4">{product.description}</p>
+            <div className="space-y-1 text-sm text-gray-700 mb-4">
+              <p><strong>Author:</strong> {product.author}</p>
+              <p><strong>Category:</strong> {product.category}</p>
             </div>
-            <div className="content space-y-4">
-              <h1 className="text-2xl font-bold">{product.name}</h1>
-              <Rating rating={product.rating} />
-              <p>{product.description}</p>
-              <div className="text-sm text-gray-600 space-y-1">
-                <p><strong>Author:</strong> {product.author}</p>
-                <p><strong>Category:</strong> {product.category}</p>
-              </div>
-              {product.features?.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-semibold">Features:</h3>
-                  <ul className="list-disc list-inside space-y-1">
-                    {product.features.map((feature, index) => (
-                      <li key={index}>{feature}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              <div className="flex items-center space-x-6 pt-4">
-                <span className="text-xl font-semibold text-indigo-600">₹{product.price}</span>
-                <button
-                  onClick={() => setIsModalOpen(true)}
-                  disabled={isBuying}
-                  className={`px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition ${
-                    isBuying ? 'opacity-75 cursor-not-allowed' : ''
-                  }`}
-                >
-                  {isBuying ? 'Processing...' : 'Buy Now'}
-                </button>
-              </div>
+            <ul className="list-disc list-inside text-gray-700 mb-6">
+              {product.features.map((f, i) => <li key={i}>{f}</li>)}
+            </ul>
+            <div className="flex items-center justify-between">
+              <span className="text-xl font-semibold text-indigo-600">₹{product.price}</span>
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="bg-indigo-600 text-white px-5 py-2 rounded-lg shadow hover:bg-indigo-700 transition"
+                disabled={isBuying}
+              >
+                {isBuying ? 'Processing...' : 'Buy Now'}
+              </button>
             </div>
           </div>
         </div>
@@ -216,41 +201,17 @@ export default function ProductDetail() {
       <Footer />
 
       {isModalOpen && (
-        <div className="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="modal-content bg-white rounded-lg p-6 max-w-md w-full">
-            <h2 className="text-xl font-semibold mb-4">Enter Your Details</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+            <h2 className="text-lg font-bold mb-4 text-gray-800">Enter Your Details</h2>
             <form onSubmit={handleBuyNow} className="space-y-4">
-              {['customerName', 'customerEmail', 'customerPhone'].map((field) => (
-                <div key={field}>
-                  <label htmlFor={field} className="block text-sm font-medium text-gray-700">
-                    {field === 'customerPhone' ? 'Phone (10 digits)' : field.replace('customer', '')}
-                  </label>
-                  <input
-                    type={field === 'customerEmail' ? 'email' : field === 'customerPhone' ? 'tel' : 'text'}
-                    id={field}
-                    name={field}
-                    value={formData[field]}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full border rounded-md p-2"
-                    required
-                  />
-                </div>
-              ))}
-              <div className="flex justify-end space-x-2 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className={`px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 ${
-                    isBuying ? 'opacity-75 cursor-not-allowed' : ''
-                  }`}
-                >
-                  {isBuying ? 'Processing...' : 'Proceed to Payment'}
+              <input type="text" name="customerName" placeholder="Your Name" required value={formData.customerName} onChange={handleInputChange} className="w-full p-2 border rounded-lg" />
+              <input type="email" name="customerEmail" placeholder="Your Email" required value={formData.customerEmail} onChange={handleInputChange} className="w-full p-2 border rounded-lg" />
+              <input type="tel" name="customerPhone" placeholder="Your Phone (10 digits)" required value={formData.customerPhone} onChange={handleInputChange} className="w-full p-2 border rounded-lg" />
+              <div className="flex justify-between mt-4">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancel</button>
+                <button type="submit" className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                  {isBuying ? 'Processing...' : 'Proceed to Pay'}
                 </button>
               </div>
             </form>
