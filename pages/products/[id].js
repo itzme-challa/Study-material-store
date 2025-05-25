@@ -2,7 +2,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 export default function ProductPage() {
@@ -11,6 +11,7 @@ export default function ProductPage() {
 
   const [product, setProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -58,11 +59,40 @@ export default function ProductPage() {
     );
   }
 
+  const handleBuyNow = async () => {
+    if (!product) return;
+
+    setIsProcessing(true);
+    try {
+      const res = await fetch('/api/order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: product.name,
+          productId: product.id,
+          successUrl: `${window.location.origin}/success?productId=${product.id}`,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.paymentLink) {
+        window.location.href = data.paymentLink;
+      } else {
+        toast.error('Failed to initiate payment. Please try again.');
+      }
+    } catch (err) {
+      toast.error('Something went wrong. Please try again.');
+      console.error(err);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Navbar />
       <ToastContainer />
-      <main className="flex-grow container mx-auto px-4 py-10">
+      <main className="flex-grow">
         {isLoading ? (
           <div className="flex justify-center items-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
@@ -70,52 +100,51 @@ export default function ProductPage() {
         ) : !product ? (
           <p className="text-center text-gray-500">Product not found.</p>
         ) : (
-          <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
-            <div className="md:flex">
-              <div className="flex-shrink-0 w-full md:w-64">
-                <img
-                  src={product.image || '/default-product.jpg'}
-                  alt={product.name}
-                  className="object-cover h-64 w-full md:h-full md:w-64"
-                />
-              </div>
-              <div className="p-6 flex flex-col justify-between">
-                <div>
-                  <h1 className="text-3xl font-bold text-indigo-700 mb-2">{product.name}</h1>
-                  <p className="text-gray-600 mb-4">{product.description}</p>
+          <>
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-16 text-center">
+              <h1 className="text-4xl md:text-5xl font-bold mb-2">{product.name}</h1>
+              <p className="text-lg">{product.description}</p>
+            </div>
 
-                  <div className="flex items-center mb-3">
-                    <div className="flex text-yellow-400 text-lg">
-                      {'★★★★★'.split('').map((_, idx) => (
-                        <span key={idx}>★</span>
-                      ))}
-                    </div>
-                    <span className="ml-2 text-sm text-gray-500">(4.9/5 rating)</span>
+            <div className="container mx-auto px-4 py-12 max-w-4xl">
+              <div className="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200">
+                <div className="md:flex">
+                  <div className="md:w-64 w-full">
+                    <img
+                      src={product.image || '/default-product.jpg'}
+                      alt={product.name}
+                      className="object-cover w-full h-64 md:h-full"
+                    />
                   </div>
-
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {product.category?.split(',').map((cat) => (
-                      <span
-                        key={cat}
-                        className="bg-indigo-100 text-indigo-700 px-3 py-1 text-sm font-medium rounded-full"
-                      >
-                        {cat.trim()}
-                      </span>
-                    ))}
+                  <div className="p-6 flex flex-col justify-between">
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-800 mb-2">{product.name}</h2>
+                      <p className="text-gray-600 mb-4">{product.description}</p>
+                      <div className="flex gap-2 flex-wrap">
+                        {product.category?.split(',').map((cat) => (
+                          <span
+                            key={cat}
+                            className="bg-indigo-100 text-indigo-700 px-3 py-1 text-sm font-medium rounded-full"
+                          >
+                            {cat.trim()}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleBuyNow}
+                      disabled={isProcessing}
+                      className={`mt-6 inline-block bg-indigo-600 hover:bg-indigo-700 text-white text-lg font-semibold px-6 py-3 rounded-xl shadow ${
+                        isProcessing ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                    >
+                      {isProcessing ? 'Processing...' : 'Buy Now'}
+                    </button>
                   </div>
                 </div>
-
-                <a
-                  href={product.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-6 inline-block bg-indigo-600 hover:bg-indigo-700 text-white text-lg font-semibold px-6 py-3 rounded-xl shadow"
-                >
-                  Buy Now on Telegram
-                </a>
               </div>
             </div>
-          </div>
+          </>
         )}
       </main>
       <Footer />
