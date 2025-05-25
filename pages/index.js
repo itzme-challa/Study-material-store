@@ -20,7 +20,12 @@ export default function Home() {
         const productsData = await productsRes.json().catch(() => []);
         const materialData = await materialRes.json().catch(() => []);
 
-        const materialProducts = transformMaterialToProducts(materialData);
+        // Find max product ID from productsData
+        const maxProductId = (productsData && productsData.length > 0) 
+          ? Math.max(...productsData.map(p => Number(p.id) || 0)) 
+          : 0;
+
+        const materialProducts = transformMaterialToProducts(materialData, maxProductId);
         setProducts([...(productsData || []), ...materialProducts]);
       } catch (error) {
         console.error('Error loading data:', error);
@@ -32,8 +37,8 @@ export default function Home() {
     fetchData();
   }, []);
 
-  function transformMaterialToProducts(materialData) {
-    let idCounter = 1000;
+  function transformMaterialToProducts(materialData, startId) {
+    let idCounter = startId + 1;
     const category = 'NEET,JEE,BOARDS';
 
     if (!Array.isArray(materialData)) return [];
