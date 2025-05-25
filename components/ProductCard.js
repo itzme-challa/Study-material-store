@@ -97,7 +97,7 @@ export default function ProductCard({ product }) {
       <Link href={`/products/${product.id}`}>
         <div className="image-container relative w-full h-64 cursor-pointer">
           <Image
-            src={product.image || '/default-book.jpg'}
+            src={product.image || '/images/default-book.jpg'}
             alt={product.name}
             fill
             className="object-cover"
