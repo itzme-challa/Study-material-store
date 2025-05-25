@@ -31,7 +31,7 @@ export default function ProductDetail() {
     document.body.appendChild(script);
   }, []);
 
-  // Load product from either products.json or material.json
+  // Load product data
   useEffect(() => {
     if (!id) return;
 
@@ -43,39 +43,42 @@ export default function ProductDetail() {
           fetch('/material.json').then(res => res.json()),
         ]);
 
-        const foundProduct = productsData.find(p => p.id === parseInt(id));
+        let foundProduct = productsData.find(p => String(p.id) === String(id));
         if (foundProduct) {
           setProduct(foundProduct);
-          return;
-        }
-
-        for (const section of materialData) {
-          const item = section.items.find(i => i.key === id);
-          if (item) {
-            const generated = {
-              id,
-              name: item.label,
-              description: `${item.label} from ${section.title}`,
-              category: 'NEET, JEE, BOARDS',
-              price: 29,
-              author: 'EduHubKMR',
-              features: [
-                'PDF + Telegram Access',
-                'Instant Delivery After Payment',
-                'Works on Any Device',
-              ],
-              telegramLink: `https://t.me/Material_eduhubkmrbot?start=${id}`,
-              rating: 4.5,
-              image: '/default-book.jpg',
-            };
-            setProduct(generated);
-            return;
+        } else {
+          // Try to find in material.json
+          for (const section of materialData) {
+            const item = section.items.find(i => String(i.key) === String(id));
+            if (item) {
+              foundProduct = {
+                id,
+                name: item.label,
+                description: `${item.label} from ${section.title}`,
+                category: 'NEET, JEE, BOARDS',
+                price: 29,
+                author: 'EduHubKMR',
+                features: [
+                  'PDF + Telegram Access',
+                  'Instant Delivery After Payment',
+                  'Works on Any Device',
+                ],
+                telegramLink: `https://t.me/Material_eduhubkmrbot?start=${id}`,
+                rating: 4.5,
+                image: '/default-book.jpg',
+              };
+              break;
+            }
+          }
+          if (foundProduct) {
+            setProduct(foundProduct);
+          } else {
+            setProduct(null);
           }
         }
-
+      } catch (error) {
+        console.error('Error loading product:', error);
         setProduct(null);
-      } catch (err) {
-        console.error('Failed to load product', err);
       } finally {
         setIsLoading(false);
       }
