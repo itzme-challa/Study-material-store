@@ -63,29 +63,39 @@ export default function ProductDetails() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-gray-50">
       <Navbar />
       <ToastContainer />
-      <main className="flex-grow container mx-auto px-4 py-12">
+      <main className="flex-grow">
         {isLoading ? (
-          <div className="flex justify-center items-center py-20">
+          <div className="flex justify-center items-center h-96">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
           </div>
         ) : !product ? (
-          <p className="text-center text-gray-500">Product not found.</p>
-        ) : (
-          <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-md p-8">
-            <h1 className="text-3xl font-bold mb-4 text-gray-800">{product.name}</h1>
-            <p className="text-gray-700 mb-6">{product.description}</p>
-            <a
-              href={product.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-lg transition"
-            >
-              Access Material
-            </a>
+          <div className="text-center py-20">
+            <h2 className="text-2xl font-semibold text-gray-700">Product Not Found</h2>
+            <p className="text-gray-500 mt-2">The product you are looking for does not exist or was removed.</p>
           </div>
+        ) : (
+          <section className="container mx-auto px-4 py-12">
+            <div className="bg-white rounded-xl shadow-lg p-8 max-w-3xl mx-auto">
+              <h1 className="text-4xl font-bold text-gray-900 mb-4">{product.name}</h1>
+              <p className="text-gray-700 mb-6 text-lg">{product.description}</p>
+              {product.category && (
+                <p className="text-sm text-indigo-600 font-medium mb-6">
+                  Categories: {product.category}
+                </p>
+              )}
+              <a
+                href={product.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-lg transition duration-300"
+              >
+                Access Material
+              </a>
+            </div>
+          </section>
         )}
       </main>
       <Footer />
