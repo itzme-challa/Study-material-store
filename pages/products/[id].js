@@ -54,6 +54,8 @@ export default function ProductPage() {
         link: `https://t.me/Material_eduhubkmrbot?start=${item.key}`,
         description: `${item.label || 'Material'} - ${group.title || 'General'}`,
         category,
+        image: item.image || '/default-product.jpg',
+        price: item.price || 0,
       }))
     );
   }
@@ -71,17 +73,38 @@ export default function ProductPage() {
           <p className="text-center text-gray-500">Product not found.</p>
         ) : (
           <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-8">
+            {product.image && (
+              <img
+                src={product.image}
+                alt={product.name}
+                className="w-full h-64 object-cover rounded mb-6"
+              />
+            )}
             <h1 className="text-3xl font-bold mb-4 text-gray-800">{product.name}</h1>
             <p className="text-gray-700 mb-4">{product.description}</p>
-            <p className="text-sm text-gray-500 mb-6">Category: {product.category}</p>
-            <a
-              href={product.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 transition"
-            >
-              Access Material
-            </a>
+            <p className="text-sm text-gray-500 mb-4">Category: {product.category}</p>
+            {product.price > 0 ? (
+              <>
+                <p className="text-xl font-semibold text-green-600 mb-4">
+                  Price: ₹{product.price}
+                </p>
+                <Link
+                  href={`/buy?id=${product.id}`}
+                  className="inline-block bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition"
+                >
+                  Buy Now
+                </Link>
+              </>
+            ) : (
+              <a
+                href={product.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 transition"
+              >
+                Access Material
+              </a>
+            )}
             <div className="mt-6">
               <Link href="/" className="text-indigo-600 hover:underline">
                 ← Back to Home
