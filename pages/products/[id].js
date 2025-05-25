@@ -6,6 +6,9 @@ import Rating from '../../components/Rating';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 
+// Define constant for default image path
+const DEFAULT_IMAGE = '/images/default-book.jpg';
+
 export default function ProductDetail() {
   const router = useRouter();
   const { id } = router.query;
@@ -34,7 +37,6 @@ export default function ProductDetail() {
         const materialData = await materialRes.json();
 
         // Process materialData into product-like array with unique IDs
-        // We'll assign IDs starting from max product id + 1
         const maxProductId = productsData.reduce((maxId, p) => Math.max(maxId, p.id), 0);
         let nextId = maxProductId + 1;
 
@@ -47,11 +49,11 @@ export default function ProductDetail() {
               description: `${category.title} - ${item.label}`,
               category: 'Premium Materials',
               price: 10,
-              rating: 0, // optional, no rating info in material.json
-              author: '', // optional, no author info
-              features: [], // optional, empty features
+              rating: 0,
+              author: '',
+              features: [],
               telegramLink: `https://t.me/Material_eduhubkmrbot?start=${item.key}`,
-              image: '/default-book.jpg', // fallback image for materials
+              image: DEFAULT_IMAGE, // Use constant for default image
             });
           });
         });
@@ -169,7 +171,7 @@ export default function ProductDetail() {
           <div className="product-container grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="image-container relative w-full h-80 lg:h-96">
               <Image
-                src={product.image || '/default-book.jpg'}
+                src={product.image || DEFAULT_IMAGE} // Use constant for default image
                 alt={product.name}
                 fill
                 className="object-cover"
@@ -279,7 +281,7 @@ export default function ProductDetail() {
                   required
                 />
               </div>
-             <div className="flex justify-end space-x-2">
+              <div className="flex justify-end space-x-2">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
