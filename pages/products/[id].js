@@ -25,12 +25,16 @@ export default function ProductDetail() {
     async function loadData() {
       setIsLoading(true);
       try {
+        // Fetch products.json
         const productsRes = await fetch('/products.json');
         const productsData = await productsRes.json();
 
+        // Fetch material.json
         const materialRes = await fetch('/material.json');
         const materialData = await materialRes.json();
 
+        // Process materialData into product-like array with unique IDs
+        // We'll assign IDs starting from max product id + 1
         const maxProductId = productsData.reduce((maxId, p) => Math.max(maxId, p.id), 0);
         let nextId = maxProductId + 1;
 
@@ -43,17 +47,21 @@ export default function ProductDetail() {
               description: `${category.title} - ${item.label}`,
               category: 'Premium Materials',
               price: 10,
-              rating: 0,
-              author: '',
-              features: [],
+              rating: 0, // optional, no rating info in material.json
+              author: '', // optional, no author info
+              features: [], // optional, empty features
               telegramLink: `https://t.me/Material_eduhubkmrbot?start=${item.key}`,
-              image: generateImageUrl(item.label),
+              image: '/default-book.jpg', // fallback image for materials
             });
           });
         });
 
+        // Combine products + materialProducts
         const combinedProducts = [...productsData, ...materialProducts];
+
+        // Find product by id (id param is string, product.id is number)
         const foundProduct = combinedProducts.find((p) => p.id === parseInt(id));
+
         setProduct(foundProduct || null);
       } catch (error) {
         console.error('Error loading product or material:', error);
@@ -73,11 +81,6 @@ export default function ProductDetail() {
     script.onload = () => console.log('Cashfree SDK loaded');
     document.body.appendChild(script);
   }, []);
-
-  const generateImageUrl = (title) => {
-    const encodedTitle = encodeURIComponent(title);
-    return `https://ui-avatars.com/api/?name=${encodedTitle}&background=random&size=400&format=svg`;
-  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -124,18 +127,15 @@ export default function ProductDetail() {
       if (!response.ok || !data.success) {
         throw new Error(data.error || 'Failed to create payment order');
       }
-
       const paymentSessionId = data.paymentSessionId;
       if (!window?.Cashfree || !paymentSessionId) {
         throw new Error('Cashfree SDK not loaded or session missing');
       }
-
       const cashfree = window.Cashfree({ mode: 'production' });
       cashfree.checkout({
         paymentSessionId,
         redirectTarget: '_self',
       });
-
       setFormData({ customerName: '', customerEmail: '', customerPhone: '' });
       setIsModalOpen(false);
     } catch (error) {
@@ -145,59 +145,96 @@ export default function ProductDetail() {
     }
   };
 
-  if (isLoading) return <div className="p-6 text-center">Loading product...</div>;
-  if (!product) return <div className="p-6 text-center text-red-600">Product not found</div>;
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <p className="text-xl text-gray-600">Product not found</p>
+      </div>
+    );
+  }
 
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <Navbar />
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row gap-8">
-          <div className="w-full md:w-1/2 relative h-80 md:h-96">
-            <Image
-              src={product.image || generateImageUrl(product.name)}
-              alt={product.name}
-              layout="fill"
-              className="object-cover rounded-lg"
-              sizes="(max-width: 768px) 100vw, 400px"
-            />
-          </div>
-          <div className="w-full md:w-1/2 space-y-4">
-            <h1 className="text-2xl font-bold">{product.name}</h1>
-            <p>{product.description}</p>
-            <p><strong>Author:</strong> {product.author || 'N/A'}</p>
-            <p><strong>Category:</strong> {product.category}</p>
-
-            {product.features?.length > 0 && (
-              <div>
-                <h3 className="font-semibold">Features:</h3>
-                <ul className="list-disc ml-5">
-                  {product.features.map((feature, index) => (
-                    <li key={index}>{feature}</li>
-                  ))}
-                </ul>
+      <main className="product-detail flex-grow">
+        <div className="container mx-auto px-4">
+          <div className="product-container grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="image-container relative w-full h-80 lg:h-96">
+              <Image
+                src={product.image || '/default-book.jpg'}
+                alt={product.name}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 400px"
+              />
+            </div>
+            <div className="content">
+              <h1>{product.name}</h1>
+              <Rating rating={product.rating} />
+              <p>{product.description}</p>
+              <div className="meta">
+                <p><strong>Author:</strong> {product.author || 'N/A'}</p>
+                <p><strong>Category:</strong> {product.category}</p>
               </div>
-            )}
-
-            <p className="text-xl font-semibold">₹{product.price}</p>
-
-            <button
-              onClick={() => setIsModalOpen(true)}
-              disabled={isBuying}
-              className={`px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition ${
-                isBuying ? 'opacity-75 cursor-not-allowed' : ''
-              }`}
-            >
-              {isBuying ? 'Processing...' : 'Buy Now'}
-            </button>
+              {product.features && product.features.length > 0 && (
+                <div className="features">
+                  <h3 className="text-lg font-semibold text-gray-700 mb-2">Features:</h3>
+                  <ul className="list-disc list-inside space-y-1 text-gray-600">
+                    {product.features.map((feature, index) => (
+                      <li key={index}>{feature}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <div className="flex items-center space-x-6 mt-4">
+                <span className="price text-xl font-bold">₹{product.price}</span>
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  disabled={isBuying}
+                  className={`buy-button px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition ${
+                    isBuying ? 'opacity-75 cursor-not-allowed' : ''
+                  }`}
+                >
+                  {isBuying ? (
+                    <span className="flex items-center">
+                      <svg
+                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Processing...
+                    </span>
+                  ) : (
+                    'Buy Now'
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </main>
+      <Footer />
 
-      {/* Modal */}
+      {/* Modal for User Details */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+        <div className="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="modal-content bg-white rounded-lg p-6 max-w-md w-full">
             <h2 className="text-xl font-semibold mb-4">Enter Your Details</h2>
             <form onSubmit={handleBuyNow} className="space-y-4">
               <div>
@@ -242,18 +279,18 @@ export default function ProductDetail() {
                   required
                 />
               </div>
-              <div className="flex justify-end space-x-2">
+             <div className="flex justify-end space-x-2">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
+                  className="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isBuying}
-                  className={`px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 ${
+                  className={`px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors ${
                     isBuying ? 'opacity-75 cursor-not-allowed' : ''
                   }`}
                 >
@@ -264,7 +301,6 @@ export default function ProductDetail() {
           </div>
         </div>
       )}
-      <Footer />
-    </>
+    </div>
   );
 }
